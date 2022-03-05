@@ -13,8 +13,9 @@ Queduler help you create, schedule and dispatch your jobs easily and fast.
 2- every job should imple IDispatchableJob, have a unique jobid(the class name maybe), and DIspatch method.
    > every job will registered in DiContainer so you caninject services in job constructor
 
-3- When dispatcher started, it appends a OnMessageReceivedEventHandler to IBroker
-4- Any time the message is equal to any jobid, the job will triggered instantly
+3- When dispatcher started, it appends a OnMessageReceivedEventHandler to IBroker.
+
+4- Any time the message is equal to any jobid, the job will triggered instantly.
 
 ### Scheduling Concept
 
