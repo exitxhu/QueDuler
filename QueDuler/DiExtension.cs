@@ -1,0 +1,64 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace KafkaDuler.Helpers
+{
+    public static class DiExtension
+    {
+
+        public static IServiceCollection AddQueduler(this IServiceCollection services, Action<QuedulerOptions> configuration)
+        {
+            var config = new QuedulerOptions();
+            configuration(config);
+
+            List<Type> dispatches = new();
+            List<Type> schedules = new();
+            foreach (var assembly in config.JobAssemblies)
+            {
+                dispatches.AddRange(assembly.DefinedTypes
+                    .Where(n => n.ImplementedInterfaces.Contains(typeof(IDispatchableJob)))
+                    .Select(n => n.AsType()));
+                schedules.AddRange(assembly.DefinedTypes
+                   .Where(n => n.ImplementedInterfaces.Contains(typeof(ISchedulableJob)))
+                   .Select(n => n.AsType()));
+            }
+
+            foreach (var type in dispatches.Concat(schedules))
+            {
+                services.AddTransient(type);
+            }
+            var args = new DispatcherArg
+            {
+                DispatchableJobs = dispatches,
+                SchedulableJobs = schedules
+            };
+            services.AddSingleton(args);
+            return services;
+        }
+        public static QuedulerOptions AddJobAssemblies(this QuedulerOptions options, params Type[] types)
+        {
+            options.JobAssemblies = types.Select(n => n.Assembly).Distinct().ToList();
+            return options;
+        }
+        public static QuedulerOptions AddJobAssemblies(this QuedulerOptions options, params Assembly[] assemblies)
+        {
+            options.JobAssemblies = assemblies.ToList();
+            return options;
+        }
+    }
+    public class QuedulerOptions
+    {
+        public List<Assembly> JobAssemblies { get; set; } = new List<Assembly>();
+    }
+    public class DispatcherArg
+    {
+        public IEnumerable<Type> DispatchableJobs { get; set; }
+        public IEnumerable<Type> SchedulableJobs { get; set; }
+    }
+}
