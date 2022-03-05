@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KafkaDuler.Helpers
+namespace QueDuler.Helpers
 {
     public static class DiExtension
     {

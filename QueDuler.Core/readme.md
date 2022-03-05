@@ -4,7 +4,7 @@ Queduler help you create, schedule and dispatch your jobs easily and fast.
 
 ## How to use
 
-* you can use the extension method: AddQueduler() in name space: KafkaDuler.Helpers to register the dispatcher 
+* you can use the extension method: AddQueduler() in name space: QueDuler.Helpers to register the dispatcher 
 * while configuring provide the assemblies which contains the jobs which implimented IDispatchableJob and ISchedulableJob interfaces
 * if you decide to implement interface
 ### Dispatching Concept
