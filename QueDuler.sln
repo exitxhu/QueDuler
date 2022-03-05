@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32112.339
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueDuler.Core", "QueDuler\QueDuler.Core.csproj", "{6F4335B9-7089-4C4B-8ECF-6DD313E4E3B7}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueDuler.Broker.Kafka", "QueDuler.Broker.Kafka\QueDuler.Broker.Kafka.csproj", "{E69687E2-A164-4C13-8949-FF6FC07B650F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueDuler.Scheduler.Hangfier", "QueDuler.Scheduler.Hangfier\QueDuler.Scheduler.Hangfier.csproj", "{57B2E88E-ABA1-40ED-9A06-DDCAF6263517}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueDuler.Core", "QueDuler.Core\QueDuler.Core.csproj", "{FB9CA1BD-6A20-445E-A9B3-A2C663715FEE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6F4335B9-7089-4C4B-8ECF-6DD313E4E3B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F4335B9-7089-4C4B-8ECF-6DD313E4E3B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F4335B9-7089-4C4B-8ECF-6DD313E4E3B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F4335B9-7089-4C4B-8ECF-6DD313E4E3B7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E69687E2-A164-4C13-8949-FF6FC07B650F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E69687E2-A164-4C13-8949-FF6FC07B650F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E69687E2-A164-4C13-8949-FF6FC07B650F}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +23,10 @@ Global
 		{57B2E88E-ABA1-40ED-9A06-DDCAF6263517}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57B2E88E-ABA1-40ED-9A06-DDCAF6263517}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57B2E88E-ABA1-40ED-9A06-DDCAF6263517}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB9CA1BD-6A20-445E-A9B3-A2C663715FEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB9CA1BD-6A20-445E-A9B3-A2C663715FEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB9CA1BD-6A20-445E-A9B3-A2C663715FEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB9CA1BD-6A20-445E-A9B3-A2C663715FEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\QueDuler\QueDuler.Core.csproj" />
+    <ProjectReference Include="..\QueDuler.Core\QueDuler.Core.csproj" />
   </ItemGroup>
 
 </Project>

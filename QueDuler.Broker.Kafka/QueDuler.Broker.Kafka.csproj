@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\QueDuler\QueDuler.Core.csproj" />
+    <ProjectReference Include="..\QueDuler.Core\QueDuler.Core.csproj" />
   </ItemGroup>
 
 </Project>
