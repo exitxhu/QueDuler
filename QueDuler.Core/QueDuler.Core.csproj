@@ -5,6 +5,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>C# Schedule Queue </PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
