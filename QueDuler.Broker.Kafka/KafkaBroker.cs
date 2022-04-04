@@ -22,6 +22,7 @@ namespace QueDuler
         }
         public async Task StartConsumingAsyn(CancellationToken cancellationToken)
         {
+            //TODO: 1-ack? 2- failure tolerance?
             using (var consumer = new ConsumerBuilder<Ignore, string>(Config).Build())
             {
                 consumer.Subscribe(topics);

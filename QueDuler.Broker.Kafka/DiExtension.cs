@@ -13,9 +13,9 @@ namespace QueDuler.Helpers
     public static class DiExtension
     {
 
-        public static QuedulerOptions AddKafkaBroker(this QuedulerOptions configuration, IServiceCollection services, ConsumerConfig KafkaConfig, ServiceLifetime BrokerLifetime = ServiceLifetime.Transient )
+        public static QuedulerOptions AddKafkaBroker(this QuedulerOptions configuration, IServiceCollection services, ConsumerConfig KafkaConfig, ServiceLifetime BrokerLifetime = ServiceLifetime.Transient,params string[] topics )
         {
-            services.Add(new ServiceDescriptor(typeof(IBroker),(s) => new KafkaBroker(KafkaConfig), BrokerLifetime));
+            services.Add(new ServiceDescriptor(typeof(IBroker),(s) => new KafkaBroker(KafkaConfig, topics), BrokerLifetime));
             return configuration;
         }
     }
