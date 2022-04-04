@@ -1,7 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using QueDuler.Helpers;
 
-public class Dispatcher
+public partial class Dispatcher
 {
     private readonly IBroker broker;
     private readonly IScheduler scheduler;
@@ -33,9 +33,9 @@ public class Dispatcher
         }
         broker.OnMessageReceived += (s, a) =>
         {
-            dispatchables.SingleOrDefault(n => n.JobId == a)?.Dispatch();
+            var arg = DispatchableJobArgument.Parse(a);
+            dispatchables.SingleOrDefault(n => n.JobId == arg.JobId)?.Dispatch(arg);
         };
         Task.Run(() => broker.StartConsumingAsyn(cancellationToken)).ConfigureAwait(false);
     }
-
 }
