@@ -3,5 +3,5 @@
 public interface IDispatchableJob
 {
     public string JobId { get; }
-    Task Dispatch(BaseArgument argument);
+    Task Dispatch(DispatchableJobArgument argument);
 }
