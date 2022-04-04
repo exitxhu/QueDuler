@@ -1,4 +1,4 @@
 ﻿public interface IScheduler
 {
-    public void Schedule(ISchedulableJob job);
+    public Task Schedule(ISchedulableJob job);
 }

@@ -2,5 +2,5 @@
 {
     public string JobId { get; }
     public string Cron { get; }
-    void Do(params object[] arguments);
+    Task Do(params object[] arguments);
 }

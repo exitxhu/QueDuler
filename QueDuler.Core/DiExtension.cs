@@ -14,6 +14,8 @@ namespace QueDuler.Helpers
 
         public static IServiceCollection AddQueduler(this IServiceCollection services, Action<QuedulerOptions> configuration)
         {
+            services.AddSingleton<Dispatcher>();
+
             var config = new QuedulerOptions();
             configuration(config);
 

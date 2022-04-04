@@ -10,7 +10,7 @@ namespace QueDuler
         {
             this.recurringJob = recurringJob;
         }
-        public void Schedule(ISchedulableJob job)
+        public async Task Schedule(ISchedulableJob job)
         {
             recurringJob.AddOrUpdate(job.JobId, () => job.Do(), job.Cron);
         }
