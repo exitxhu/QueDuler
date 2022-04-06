@@ -14,7 +14,19 @@ public class DispatchableJobArgument : BaseArgument
     }
     public string JobId { get; }
     public object ArgumentObject { get; }
-    public static DispatchableJobArgument Parse(string json) => JsonSerializer.Deserialize<DispatchableJobArgument>(json);
+    public static bool TryParse(string json, out DispatchableJobArgument argument)
+    {
+        try
+        {
+            argument = JsonSerializer.Deserialize<DispatchableJobArgument>(json);
+            return true;
+        }
+        catch (Exception)
+        {
+            argument = null;
+            return false;
+        }
+    }
 
     public override string ToJson() => JsonSerializer.Serialize(this);
 }

@@ -33,8 +33,16 @@ public partial class Dispatcher
         }
         broker.OnMessageReceived += (s, a) =>
         {
-            var arg = DispatchableJobArgument.Parse(a);
-            dispatchables.SingleOrDefault(n => n.JobId == arg.JobId)?.Dispatch(arg);
+            try
+            {
+                var check = DispatchableJobArgument.TryParse(a, out var arg);
+                if (check)
+                    dispatchables.SingleOrDefault(n => n.JobId == arg.JobId)?.Dispatch(arg);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         };
         Task.Run(() => broker.StartConsumingAsyn(cancellationToken)).ConfigureAwait(false);
     }
