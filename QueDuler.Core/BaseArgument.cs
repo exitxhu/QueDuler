@@ -3,7 +3,7 @@ using System.Text.Json;
 
 public abstract class BaseArgument
 {
-    public override string ToString() => JsonSerializer.Serialize(this);
+    public abstract string ToJson();
 }
 public class DispatchableJobArgument : BaseArgument
 {
@@ -15,4 +15,6 @@ public class DispatchableJobArgument : BaseArgument
     public string JobId { get; }
     public object ArgumentObject { get; }
     public static DispatchableJobArgument Parse(string json) => JsonSerializer.Deserialize<DispatchableJobArgument>(json);
+
+    public override string ToJson() => JsonSerializer.Serialize(this);
 }
