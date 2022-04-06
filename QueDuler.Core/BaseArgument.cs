@@ -1,5 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using System.Text.Json;
+using Newtonsoft.Json;
 
 public abstract class BaseArgument
 {
@@ -18,7 +18,7 @@ public class DispatchableJobArgument : BaseArgument
     {
         try
         {
-            argument = JsonSerializer.Deserialize<DispatchableJobArgument>(json);
+            argument = JsonConvert.DeserializeObject<DispatchableJobArgument>(json);
             return true;
         }
         catch (Exception)
@@ -28,5 +28,5 @@ public class DispatchableJobArgument : BaseArgument
         }
     }
 
-    public override string ToJson() => JsonSerializer.Serialize(this);
+    public override string ToJson() => JsonConvert.SerializeObject(this);
 }
