@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using QueDuler;
 using System;
@@ -20,6 +21,10 @@ namespace QueDuler.Helpers
 
             services.AddTransient<IScheduler, HangfireScheduler>();
             return configuration;
+        }
+        public static void UseQuedulerHangfireDahsboard(this IApplicationBuilder app)
+        {
+            app.UseHangfireDashboard();
         }
     }
 }
