@@ -21,6 +21,14 @@ namespace QueDuler.Helpers
 
             services.AddTransient<IScheduler, HangfireScheduler>();
             return configuration;
+        } 
+        public static QuedulerOptions AddHangfireScheduler(this QuedulerOptions configuration, IServiceCollection services, Action<IGlobalConfiguration> hangfireConfig, Action<BackgroundJobServerOptions> hangfireServerOptionsAction)
+        {
+            services.AddHangfire(hangfireConfig);
+            services.AddHangfireServer(hangfireServerOptionsAction);
+
+            services.AddTransient<IScheduler, HangfireScheduler>();
+            return configuration;
         }
         public static void UseQuedulerHangfireDahsboard(this IApplicationBuilder app)
         {
