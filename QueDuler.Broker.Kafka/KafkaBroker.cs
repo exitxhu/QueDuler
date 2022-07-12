@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,17 @@ namespace QueDuler
 {
     public class KafkaBroker : IBroker
     {
+        private readonly ILogger<KafkaBroker> _logger;
         private readonly string[] topics;
 
         public ConsumerConfig Config { get; }
         public event EventHandler<string> OnMessageReceived;
 
-        public KafkaBroker(ConsumerConfig config, params string[] topics)
+        public KafkaBroker(ConsumerConfig config,ILogger<KafkaBroker> logger, params string[] topics)
         {
 
             Config = config;
+            this._logger = logger;
             this.topics = topics;
         }
         public async Task StartConsumingAsyn(CancellationToken cancellationToken)
@@ -29,9 +32,17 @@ namespace QueDuler
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var consumeResult = consumer.Consume();
+                    try
+                    {
+                        var consumeResult = consumer.Consume();
 
-                    OnMessageReceived(this, consumeResult.Message.Value);
+                        OnMessageReceived(this, consumeResult.Message.Value);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogCritical(ex, "Kafka broker has encountered some error");
+                        throw;
+                    }
                 }
 
                 consumer.Close();
