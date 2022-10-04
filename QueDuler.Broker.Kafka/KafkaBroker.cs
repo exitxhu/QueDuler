@@ -28,23 +28,31 @@ namespace QueDuler
             //TODO: 1-ack? 2- failure tolerance?
             using (var consumer = new ConsumerBuilder<Ignore, string>(Config).Build())
             {
-                consumer.Subscribe(_topics);
-                _logger.LogWarning("Kafka broker subscribed to : {0}", String.Join(", ", _topics));
-                while (!cancellationToken.IsCancellationRequested)
+                try
                 {
-                    try
+                    _logger.LogWarning("Kafka broker will subscrib to: {0}", String.Join(", ", _topics));
+                    consumer.Subscribe(_topics);
+                    while (!cancellationToken.IsCancellationRequested)
                     {
-                        var consumeResult = consumer.Consume();
-                        _logger.LogWarning("Kafka broker has received a new message: {0}", consumeResult.Message.Value);
-                        OnMessageReceived(this, consumeResult.Message.Value);
+                        try
+                        {
+                            var consumeResult = consumer.Consume();
+                            _logger.LogWarning("Kafka broker has received a new message: {0}", consumeResult.Message.Value);
+                            OnMessageReceived(this, consumeResult.Message.Value);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogCritical(ex, "Kafka broker has encountered some error");
+                            throw;
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        _logger.LogCritical(ex, "Kafka broker has encountered some error");
-                        throw;
-                    }
+                    consumer.Close();
                 }
-                consumer.Close();
+                catch (Exception ex)
+                {
+                    _logger.LogCritical(ex,"Kafka broker has some major error and con not start consuming!");
+                    throw;
+                }
             }
         }
         public void PushMessage(string message) => OnMessageReceived?.Invoke(this, message);
