@@ -60,7 +60,7 @@ public partial class Dispatcher
                     ?? throw new JobNotInjectedException(job.FullName);
                 dispatchables.Add(j);
             }
-            _broker.OnMessageReceived += (s, a) =>
+            _broker.OnMessageReceived += async (s, a) =>
             {
                 try
                 {
@@ -71,7 +71,7 @@ public partial class Dispatcher
                     {
                         var j = _provider.CreateScope().ServiceProvider.GetService(
                             dispatchables.SingleOrDefault(n => n.JobId == arg.JobId)?.GetType()) as IDispatchableJob;
-                        j.Dispatch(arg);
+                        await j.Dispatch(arg);
 
                     }
                 }
