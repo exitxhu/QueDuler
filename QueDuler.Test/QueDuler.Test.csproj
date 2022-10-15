@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QueDuler.Broker.Kafka\QueDuler.Broker.Kafka.csproj" />
+    <ProjectReference Include="..\QueDuler.Core\QueDuler.Core.csproj" />
+    <ProjectReference Include="..\QueDuler.Scheduler.Hangfier\QueDuler.Scheduler.Hangfier.csproj" />
+  </ItemGroup>
+
+</Project>

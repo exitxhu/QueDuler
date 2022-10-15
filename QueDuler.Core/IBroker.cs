@@ -1,7 +1,9 @@
 ﻿public interface IBroker
 {
-    public event EventHandler<string> OnMessageReceived;
+    public event EventHandler<OnMessageReceivedArgs> OnMessageReceived;
 
-    void PushMessage(string message);
+    void PushMessage(OnMessageReceivedArgs message);
     Task StartConsumingAsyn(CancellationToken cancellationToken);
 }
+public record OnMessageReceivedArgs(string Message, string JobPath = null);
+

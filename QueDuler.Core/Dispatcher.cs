@@ -64,14 +64,22 @@ public partial class Dispatcher
             {
                 try
                 {
-                    _logger.LogWarning($"Injected OnMessageReceived received a new message received {a}");
+                    _logger.LogInformation($"Injected OnMessageReceived received a new message received {a}");
 
-                    var check = DispatchableJobArgument.TryParse(a, out var arg);
+                    var check = DispatchableJobArgument.TryParse(a.Message, out DispatchableJobArgument arg);
                     if (check)
                     {
-                        var j = _provider.CreateScope().ServiceProvider.GetService(
-                            dispatchables.SingleOrDefault(n => n.JobId == arg.JobId)?.GetType()) as IDispatchableJob;
-                        await j.Dispatch(arg);
+                        var job = dispatchables.SingleOrDefault(n => n.JobId == arg.JobId && n.JobPath == a.JobPath)?.GetType();
+                        if (job is null)
+                        {
+                            _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
+                            return;
+                        }
+                        var service = _provider.CreateScope().ServiceProvider.GetService(job) as IDispatchableJob;
+                        if (service is not null)
+                            await service.Dispatch(arg);
+                        else
+                            _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
 
                     }
                 }
