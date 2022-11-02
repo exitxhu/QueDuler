@@ -77,7 +77,13 @@ public partial class Dispatcher
                         }
                         var service = _provider.CreateScope().ServiceProvider.GetService(job) as IDispatchableJob;
                         if (service is not null)
+                        {
+                            Console.WriteLine($"start dispatching {arg.ToJson()}\n\n");
                             await service.Dispatch(arg);
+                            Console.WriteLine($"end dispatching {arg.ToJson()}\n\n");
+
+
+                        }
                         else
                             _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
 

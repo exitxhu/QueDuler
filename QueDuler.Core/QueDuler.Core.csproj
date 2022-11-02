@@ -10,6 +10,8 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>C# Schedule Queue </PackageTags>
     <Version>$(VersionPrefix)1.2.1</Version>
+    <IncludeSymbols>True</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
