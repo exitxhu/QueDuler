@@ -21,7 +21,7 @@ var serviceProvider = services.BuildServiceProvider();
 serviceProvider
     .GetService<ILoggerFactory>();
 
-var dispatcher= serviceProvider.GetService<Dispatcher>();
+var dispatcher = serviceProvider.GetService<Dispatcher>();
 dispatcher.Start(new CancellationToken { });
 Console.ReadLine();
 
@@ -33,6 +33,6 @@ public class SampleJOb : IDispatchableJob
 
     public async Task Dispatch(DispatchableJobArgument argument)
     {
-        Thread.Sleep(20000);
+        await Task.Delay(2000);
     }
 }

@@ -14,7 +14,7 @@ namespace QueDuler
         private readonly string[] _topics;
 
         public ConsumerConfig Config { get; }
-        public event EventHandler<OnMessageReceivedArgs> OnMessageReceived;
+        public event Func<object, OnMessageReceivedArgs, Task> OnMessageReceived;
 
         public KafkaBroker(ConsumerConfig config, ILogger<KafkaBroker> logger, params string[] topics)
         {
@@ -27,7 +27,7 @@ namespace QueDuler
             List<Task> tasks = new List<Task>();
             foreach (var topic in _topics)
             {
-                tasks.Add(Task.Run(() =>
+                tasks.Add(Task.Run(async () =>
                   {
                       string msg = string.Empty;
                       using var consumer = new ConsumerBuilder<Ignore, string>(Config).Build();
@@ -42,7 +42,7 @@ namespace QueDuler
                                   var consumeResult = consumer.Consume();
                                   msg = consumeResult.Message.Value;
                                   _logger.LogInformation("Kafka broker has received a new message: {0}", msg);
-                                  OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic));
+                                  await OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic));
                               }
                               catch (Exception ex) when (ex.Message.Contains("Application maximum poll", StringComparison.InvariantCultureIgnoreCase))
                               {
