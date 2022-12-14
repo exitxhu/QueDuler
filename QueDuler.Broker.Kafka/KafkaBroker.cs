@@ -6,51 +6,63 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QueDuler
+namespace QueDuler;
+
+public class KafkaBroker : IBroker
 {
-    public class KafkaBroker : IBroker
+    private readonly ILogger<KafkaBroker> _logger;
+    private readonly List<TopicMetadata> _topics;
+
+    public ConsumerConfig Config { get; }
+    public event Func<object, OnMessageReceivedArgs, Task> OnMessageReceived;
+
+    public KafkaBroker(ConsumerConfig config, ILogger<KafkaBroker> logger, params string[] topics)
     {
-        private readonly ILogger<KafkaBroker> _logger;
-        private readonly string[] _topics;
-
-        public ConsumerConfig Config { get; }
-        public event Func<object, OnMessageReceivedArgs, Task> OnMessageReceived;
-
-        public KafkaBroker(ConsumerConfig config, ILogger<KafkaBroker> logger, params string[] topics)
+        Config = config;
+        _logger = logger;
+        _topics = topics.Select(a => new TopicMetadata
         {
-            Config = config;
-            _logger = logger;
-            _topics = topics;
-        }
-        public async Task StartConsumingAsyn(CancellationToken cancellationToken)
+            TopicName = a
+        }).ToList();
+    }
+    public KafkaBroker(ConsumerConfig config, ILogger<KafkaBroker> logger, List<TopicMetadata> topics)
+    {
+        Config = config;
+        _logger = logger;
+        _topics = topics;
+    }
+    public async Task StartConsumingAsyn(CancellationToken cancellationToken)
+    {
+        List<Task> tasks = new List<Task>();
+        foreach (var topic in _topics)
         {
-            List<Task> tasks = new List<Task>();
-            foreach (var topic in _topics)
+            for (int i = 0; i < topic.ConsumerCount; i++)
             {
+
                 tasks.Add(Task.Run(async () =>
                   {
                       string msg = string.Empty;
                       using var consumer = new ConsumerBuilder<Ignore, string>(Config).Build();
                       try
                       {
-                          _logger.LogWarning("Kafka consumer: {0} will subscrib to: {1}", topic, consumer.MemberId);
-                          consumer.Subscribe(topic);
+                          _logger.LogWarning("Kafka consumer: {0} will subscrib to: {1}, consumer number {2}", topic, consumer.MemberId, i + 1);
+                          consumer.Subscribe(topic.TopicName);
                           while (!cancellationToken.IsCancellationRequested)
                           {
                               try
                               {
                                   var consumeResult = consumer.Consume();
                                   msg = consumeResult.Message.Value;
-                                  _logger.LogInformation("Kafka broker has received a new message: {0}", msg);
-                                  await OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic));
+                                  _logger.LogInformation("Kafka broker has received a new message: {0}, consumer number {1}", msg, i + 1);
+                                  await OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic.TopicName));
                               }
                               catch (Exception ex) when (ex.Message.Contains("Application maximum poll", StringComparison.InvariantCultureIgnoreCase))
                               {
-                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}", msg);
+                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, i + 1);
                               }
                               catch (Exception ex)
                               {
-                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}", msg);
+                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, i + 1);
                                   break;
                               }
                           }
@@ -58,13 +70,18 @@ namespace QueDuler
                       }
                       catch (Exception ex)
                       {
-                          _logger.LogCritical(ex, "Kafka broker on topic: {0} has some major error and con not start consuming!", topic);
+                          _logger.LogCritical(ex, "Kafka broker on topic: {0}, consumer number {1} has some major error and con not start consuming!", topic, i + 1);
                           throw;
                       }
                   }));
             }
-            await Task.WhenAll(tasks);
         }
-        public void PushMessage(OnMessageReceivedArgs message) => OnMessageReceived?.Invoke(this, message);
+        await Task.WhenAll(tasks);
     }
+    public void PushMessage(OnMessageReceivedArgs message) => OnMessageReceived?.Invoke(this, message);
+}
+public class TopicMetadata
+{
+    public string TopicName { get; set; }
+    public int ConsumerCount { get; set; } = 1;
 }

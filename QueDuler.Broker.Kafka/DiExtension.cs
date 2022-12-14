@@ -24,5 +24,15 @@ namespace QueDuler.Helpers
                new KafkaBroker(KafkaConfig, s.GetRequiredService<ILogger<KafkaBroker>>(), topics), BrokerLifetime));
             return configuration;
         }
+        public static QuedulerOptions AddKafkaBroker(this QuedulerOptions configuration,
+                                             IServiceCollection services,
+                                             ConsumerConfig KafkaConfig,
+                                             List<TopicMetadata> topics,
+                                             ServiceLifetime BrokerLifetime = ServiceLifetime.Transient)
+        {
+            services.Add(new ServiceDescriptor(typeof(IBroker), (s) =>
+               new KafkaBroker(KafkaConfig, s.GetRequiredService<ILogger<KafkaBroker>>(), topics), BrokerLifetime));
+            return configuration;
+        }
     }
 }
