@@ -45,7 +45,7 @@ public class KafkaBroker : IBroker
                       using var consumer = new ConsumerBuilder<Ignore, string>(Config).Build();
                       try
                       {
-                          _logger.LogWarning("Kafka consumer: {0} will subscrib to: {1}, consumer number {2}", topic, consumer.MemberId, i + 1);
+                          _logger.LogWarning("Kafka consumer: will subscrib to: {0}, consumer number {1}", topic, i + 1);
                           consumer.Subscribe(topic.TopicName);
                           while (!cancellationToken.IsCancellationRequested)
                           {
