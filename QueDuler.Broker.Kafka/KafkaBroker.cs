@@ -38,14 +38,14 @@ public class KafkaBroker : IBroker
         {
             for (int i = 0; i < topic.ConsumerCount; i++)
             {
-
+                var consumerCount = i + 1;
                 tasks.Add(Task.Run(async () =>
                   {
                       string msg = string.Empty;
                       using var consumer = new ConsumerBuilder<Ignore, string>(Config).Build();
                       try
                       {
-                          _logger.LogWarning("Kafka consumer: will subscrib to: {0}, consumer number {1}", topic.TopicName, i + 1);
+                          _logger.LogWarning("Kafka consumer: will subscrib to: {0}, consumer number {1}", topic.TopicName, consumerCount);
                           consumer.Subscribe(topic.TopicName);
                           while (!cancellationToken.IsCancellationRequested)
                           {
@@ -53,16 +53,16 @@ public class KafkaBroker : IBroker
                               {
                                   var consumeResult = consumer.Consume();
                                   msg = consumeResult.Message.Value;
-                                  _logger.LogDebug("Kafka broker has received a new message: {0}, consumer number {1}", msg, i + 1);
+                                  _logger.LogDebug("Kafka broker has received a new message: {0}, consumer number {1}", msg, consumerCount);
                                   await OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic.TopicName));
                               }
                               catch (Exception ex) when (ex.Message.Contains("Application maximum poll", StringComparison.InvariantCultureIgnoreCase))
                               {
-                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, i + 1);
+                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, consumerCount);
                               }
                               catch (Exception ex)
                               {
-                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, i + 1);
+                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, consumerCount);
                                   break;
                               }
                           }
@@ -70,7 +70,7 @@ public class KafkaBroker : IBroker
                       }
                       catch (Exception ex)
                       {
-                          _logger.LogCritical(ex, "Kafka broker on topic: {0}, consumer number {1} has some major error and con not start consuming!", topic, i + 1);
+                          _logger.LogCritical(ex, "Kafka broker on topic: {0}, consumer number {1} has some major error and con not start consuming!", topic, consumerCount);
                           throw;
                       }
                   }));
