@@ -7,11 +7,13 @@ public abstract class BaseArgument
 }
 public class DispatchableJobArgument : BaseArgument
 {
-    public DispatchableJobArgument(string jobId, object argumentObject = null)
+    public DispatchableJobArgument(string jobId, object argumentObject = null, bool isBroadCast = false)
     {
         JobId = jobId;
         ArgumentObject = argumentObject;
+        IsBroadCast = isBroadCast;
     }
+    public bool IsBroadCast { get; }
     public string JobId { get; }
     public object ArgumentObject { get; }
     public static bool TryParse(string json, out DispatchableJobArgument argument)

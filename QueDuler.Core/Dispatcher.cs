@@ -69,20 +69,26 @@ public partial class Dispatcher
                     var check = DispatchableJobArgument.TryParse(a.Message, out DispatchableJobArgument arg);
                     if (check)
                     {
-                        var job = dispatchables.SingleOrDefault(n => n.JobId == arg.JobId && n.JobPath == a.JobPath)?.GetType();
-                        if (job is null)
+                        var jobs = dispatchables.Where(n => n.JobPath == a.JobPath).ToList();
+                        if (jobs is null || !jobs.Any())
                         {
                             _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
                             return;
                         }
-                        var service = _provider.CreateScope().ServiceProvider.GetService(job) as IDispatchableJob;
-                        if (service is not null)
+                        if (arg.IsBroadCast)
                         {
-                            await service.Dispatch(arg);
+                            var jobTasks = jobs.Select(j => Task.Run(async () =>
+                            {
+                                var job = j.GetType();
+                                await DispatchJob(a, arg, job);
+                            }));
+                            Task.WaitAll(jobTasks.ToArray());
                         }
                         else
-                            _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
-
+                        {
+                            var job = jobs.SingleOrDefault(a => a.JobId == arg.JobId)?.GetType();
+                            await DispatchJob(a, arg, job);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -92,6 +98,17 @@ public partial class Dispatcher
                 }
             };
             Task.Run(() => _broker.StartConsumingAsyn(cancellationToken)).ConfigureAwait(false);
+        }
+
+        async Task DispatchJob(OnMessageReceivedArgs a, DispatchableJobArgument arg, Type? job)
+        {
+            var service = _provider.CreateScope().ServiceProvider.GetService(job) as IDispatchableJob;
+            if (service is not null)
+            {
+                await service.Dispatch(arg);
+            }
+            else
+                _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
         }
     }
 }
