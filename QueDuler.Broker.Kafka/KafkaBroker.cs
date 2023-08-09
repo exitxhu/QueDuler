@@ -54,7 +54,7 @@ public class KafkaBroker : IBroker
                                   var consumeResult = consumer.Consume();
                                   msg = consumeResult.Message.Value;
                                   _logger.LogDebug("Kafka broker has received a new message: {0}, consumer number {1}", msg, consumerCount);
-                                  await OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic.TopicName));
+                                  await OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic.TopicName, consumeResult.Message));
                               }
                               catch (Exception ex) when (ex.Message.Contains("Application maximum poll", StringComparison.InvariantCultureIgnoreCase))
                               {

@@ -6,7 +6,7 @@
     <Nullable>enable</Nullable>
     <PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Broker.Kafka</PackageProjectUrl>
     <RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Broker.Kafka</RepositoryUrl>
-    <Version>$(VersionPrefix)1.4.1</Version>
+    <Version>$(VersionPrefix)1.4.2</Version>
   </PropertyGroup>
 
   <ItemGroup>

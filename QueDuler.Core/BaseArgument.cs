@@ -21,7 +21,7 @@ public class DispatchableJobArgument : BaseArgument
         try
         {
             argument = JsonConvert.DeserializeObject<DispatchableJobArgument>(json);
-            return true;
+            return !string.IsNullOrEmpty(argument.JobId);
         }
         catch (Exception)
         {

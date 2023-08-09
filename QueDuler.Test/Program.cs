@@ -13,7 +13,7 @@ services.AddQueduler(a => a.AddKafkaBroker(services, new Confluent.Kafka.Consume
     GroupId = "aa",
     AutoOffsetReset = Confluent.Kafka.AutoOffsetReset.Earliest,
 
-}, topics: "jtopic").AddJobAssemblies(typeof(Program)));
+}, topics: "jtopic_InsertOrderDraft").AddJobAssemblies(typeof(Program)));
 
 var serviceProvider = services.BuildServiceProvider();
 
@@ -29,9 +29,11 @@ public class SampleJOb : IDispatchableJob
 {
     public string JobId => "SyncRedisWithDbJob";
 
-    public string JobPath => "jtopic";
+    public string JobPath => "jtopic_InsertOrderDraft";
 
-    public async Task Dispatch(DispatchableJobArgument argument)
+    public bool LoosArgument => true;
+
+    public async Task Dispatch(DispatchableJobArgument argument, object? originalMessage = null)
     {
         await Task.Delay(2000);
     }
