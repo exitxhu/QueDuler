@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.Hangfier</PackageProjectUrl>
+		<RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.Hangfier</RepositoryUrl>
+		<Version>$(VersionPrefix)1.1.1</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NCrontab.Signed" Version="3.3.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\QueDuler.Core\QueDuler.Core.csproj" />
+	</ItemGroup>
+
+</Project>

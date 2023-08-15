@@ -1,10 +1,10 @@
 ﻿using Hangfire;
 
-namespace QueDuler
+namespace QueDuler;
+
+public class HangfireScheduler : IScheduler
 {
-    public class HangfireScheduler : IScheduler
-    {
-        private readonly IRecurringJobManager recurringJob;
+    private readonly IRecurringJobManager recurringJob;
 
         public HangfireScheduler(IRecurringJobManager recurringJob)
         {

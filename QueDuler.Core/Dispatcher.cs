@@ -47,7 +47,7 @@ public partial class Dispatcher
         {
             foreach (var job in _jobs.SchedulableJobs)
             {
-                var j = _provider.GetService(job) as ISchedulableJob
+                var j = _provider.CreateScope().ServiceProvider.GetService(job) as ISchedulableJob
                     ?? throw new JobNotInjectedException(job.FullName);
                 _scheduler.Schedule(j);
             }
@@ -56,7 +56,7 @@ public partial class Dispatcher
         {
             foreach (var job in _jobs.DispatchableJobs)
             {
-                var j = _provider.GetService(job) as IDispatchableJob
+                var j = _provider.CreateScope().ServiceProvider.GetService(job) as IDispatchableJob
                     ?? throw new JobNotInjectedException(job.FullName);
                 dispatchables.Add(j);
             }
