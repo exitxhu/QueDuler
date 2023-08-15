@@ -1,18 +1,17 @@
 ﻿using Hangfire;
 
-namespace QueDuler
-{
-    public class HangfireScheduler : IScheduler
-    {
-        private readonly IRecurringJobManager recurringJob;
+namespace QueDuler;
 
-        public HangfireScheduler(IRecurringJobManager recurringJob)
-        {
-            this.recurringJob = recurringJob;
-        }
-        public async Task Schedule(ISchedulableJob job)
-        {
-            recurringJob.AddOrUpdate(job.JobId, () => job.Do(), job.Cron);
-        }
+public class HangfireScheduler : IScheduler
+{
+    private readonly IRecurringJobManager recurringJob;
+
+    public HangfireScheduler(IRecurringJobManager recurringJob)
+    {
+        this.recurringJob = recurringJob;
+    }
+    public async Task Schedule(ISchedulableJob job)
+    {
+        recurringJob.AddOrUpdate(job.JobId, () => job.Do(), job.Cron);
     }
 }
