@@ -5,7 +5,7 @@ namespace QueDuler;
 
 class PersistedJob
 {
-    public CrontabSchedule Scheduler => CrontabSchedule.Parse(Job.Cron);
+    public CrontabSchedule Scheduler => CrontabSchedule.Parse(Job.Cron, new CrontabSchedule.ParseOptions { IncludingSeconds = Job.Cron.Split(" ").Length > 5 ? true : false });
     public DateTime NextSchedule => Scheduler.GetNextOccurrence(DateTime.Now);
     public ISchedulableJob Job { get; internal set; }
     public bool IsLocked { get; set; }

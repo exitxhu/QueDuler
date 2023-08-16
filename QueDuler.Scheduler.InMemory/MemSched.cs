@@ -38,10 +38,15 @@ public class MemSched
                         }
                         catch (Exception ex)
                         {
+                        }
+                        finally
+                        {
                             a.IsLocked = false;
+
                         }
                     }
                 }));
+                Task.WhenAll(tsk).ConfigureAwait(false);
             }
         });
     }

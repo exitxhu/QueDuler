@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
@@ -9,7 +9,7 @@
     <RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>C# Schedule Queue </PackageTags>
-    <Version>$(VersionPrefix)1.4.2</Version>
+    <Version>$(VersionPrefix)1.4.3</Version>
     <IncludeSymbols>True</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>

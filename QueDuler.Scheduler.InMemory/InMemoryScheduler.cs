@@ -1,4 +1,6 @@
-﻿namespace QueDuler;
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace QueDuler;
 
 public class InMemoryScheduler : IScheduler
 {
@@ -14,3 +16,4 @@ public class InMemoryScheduler : IScheduler
         _memSched.AddOrUpdate(job);
     }
 }
+

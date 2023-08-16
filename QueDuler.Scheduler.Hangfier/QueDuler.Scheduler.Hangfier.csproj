@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.Hangfier</PackageProjectUrl>
     <RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.Hangfier</RepositoryUrl>
-    <Version>$(VersionPrefix)1.4.1</Version>
+    <Version>$(VersionPrefix)1.4.3</Version>
   </PropertyGroup>
 
   <ItemGroup>
