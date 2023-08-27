@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QueDuler.Core;
 using QueDuler.Helpers;
+using System.Collections.Concurrent;
 
 public partial class Dispatcher
 {
@@ -138,7 +139,7 @@ public partial class Dispatcher
 }
 public static class DispatcherMemMapper
 {
-    static Dictionary<string, JobDets> _mem = new();
+    static ConcurrentDictionary<string, JobDets> _mem = new();
     public static void Add(string key, JobDets value)
     {
         _mem.TryAdd(key, value);

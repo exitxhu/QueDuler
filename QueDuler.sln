@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueDuler.Scheduler.Hangfier
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueDuler.Core", "QueDuler.Core\QueDuler.Core.csproj", "{FB9CA1BD-6A20-445E-A9B3-A2C663715FEE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "QueDuler.Test", "QueDuler.Test\QueDuler.Test.csproj", "{0506A3C5-E529-41CD-A04C-2B70FCC1964C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueDuler.Test", "QueDuler.Test\QueDuler.Test.csproj", "{0506A3C5-E529-41CD-A04C-2B70FCC1964C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "QueDuler.Scheduler.InMemory", "QueDuler.Scheduler.InMemory\QueDuler.Scheduler.InMemory.csproj", "{AFF3AD41-415F-45BC-978F-C52D0B922A71}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Queduler.Broker.InMemory", "Queduler.Broker.InMemory\Queduler.Broker.InMemory.csproj", "{1FE8F760-254B-44BB-852B-0EC42C99829B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{AFF3AD41-415F-45BC-978F-C52D0B922A71}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFF3AD41-415F-45BC-978F-C52D0B922A71}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFF3AD41-415F-45BC-978F-C52D0B922A71}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1FE8F760-254B-44BB-852B-0EC42C99829B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FE8F760-254B-44BB-852B-0EC42C99829B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FE8F760-254B-44BB-852B-0EC42C99829B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FE8F760-254B-44BB-852B-0EC42C99829B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
