@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.InMemory</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.InMemory</RepositoryUrl>
-		<Version>$(VersionPrefix)1.4.3</Version>
+		<Version>$(VersionPrefix)1.4.4</Version>
 	</PropertyGroup>
 
 	<ItemGroup>

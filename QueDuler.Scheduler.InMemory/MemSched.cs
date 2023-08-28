@@ -25,7 +25,7 @@ public class MemSched
             while (true)
             {
                 await Task.Delay(option.TickTimeMillisecond);
-                HashSet<PersistedJob>? js = Jobs.Where(a => !a.IsLocked && a.NextSchedule > DateTime.Now).ToHashSet();
+                HashSet<PersistedJob>? js = Jobs.Where(a => !a.IsLocked && a.NextSchedule <= DateTime.Now).ToHashSet();
                 var tsk = js.Select(a => Task.Run(async () =>
                 {
                     var pr = _provider.CreateScope().ServiceProvider.GetService(a.Job.GetType()) as ISchedulableJob;
