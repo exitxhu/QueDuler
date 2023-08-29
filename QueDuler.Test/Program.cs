@@ -81,7 +81,7 @@ public class SampleIneMem : ISchedulableJob
     }
     public string JobId => "ana";
     //public string Cron => "*/5 * * * *";
-    public string Cron => "* * * * * *";
+    public string Cron => "*/15 * * * * *";
 
     public Dispatcher Dispatcher1 { get; }
 
