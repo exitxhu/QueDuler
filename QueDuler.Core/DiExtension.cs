@@ -41,6 +41,8 @@ namespace QueDuler.Helpers
                 SchedulableJobs = schedules
             };
             services.AddSingleton(args);
+            services.AddScoped<JobResolver>();
+
             return services;
         }
         public static QuedulerOptions AddJobAssemblies(this QuedulerOptions options, params Type[] types)

@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using QueDuler.Core;
 using QueDuler.Helpers;
 using System.Collections.Concurrent;
-
 public partial class Dispatcher
 {
     private readonly IBroker? _broker;
@@ -118,24 +117,24 @@ public partial class Dispatcher
                 }
                 catch (Exception ex)
                 {
-                //Todo: something about it
-                _logger.LogCritical(ex, $"Injected OnMessageReceived (queduler kafka broker) encountered an error: {ex.Message}");
-            }
-        };
-        Task.Run(() => _broker.StartConsumingAsyn(cancellationToken)).ConfigureAwait(false);
-    }
-
-    async Task DispatchJob(OnMessageReceivedArgs a, DispatchableJobArgument arg, Type? job)
-    {
-        var service = _provider.CreateScope().ServiceProvider.GetService(job) as IDispatchableJob;
-        if (service is not null)
-        {
-            await service.Dispatch(arg, a.originalMessage);
+                    //Todo: something about it
+                    _logger.LogCritical(ex, $"Injected OnMessageReceived (queduler kafka broker) encountered an error: {ex.Message}");
+                }
+            };
+            Task.Run(() => _broker.StartConsumingAsyn(cancellationToken)).ConfigureAwait(false);
         }
-        else
-            _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
+
+        async Task DispatchJob(OnMessageReceivedArgs a, DispatchableJobArgument arg, Type? job)
+        {
+            var service = _provider.CreateScope().ServiceProvider.GetService(job) as IDispatchableJob;
+            if (service is not null)
+            {
+                await service.Dispatch(arg, a.originalMessage);
+            }
+            else
+                _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
+        }
     }
-}
 }
 public static class DispatcherMemMapper
 {
