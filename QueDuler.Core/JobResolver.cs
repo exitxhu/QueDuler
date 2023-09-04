@@ -1,6 +1,9 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Microsoft.Extensions.Logging;
 
+/// <summary>
+/// Resolve any jobs that registered
+/// </summary>
 public sealed class JobResolver
 {
     private readonly IServiceProvider _provider;
