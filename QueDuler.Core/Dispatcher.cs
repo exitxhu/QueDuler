@@ -4,6 +4,8 @@ using Microsoft.Extensions.Logging;
 using QueDuler.Core;
 using QueDuler.Helpers;
 using System.Collections.Concurrent;
+using static JobCache;
+
 public partial class Dispatcher
 {
     private readonly IBroker? _broker;
@@ -49,6 +51,7 @@ public partial class Dispatcher
             {
                 var j = _provider.CreateScope().ServiceProvider.GetService(job) as ISchedulableJob
                     ?? throw new JobNotInjectedException(job.FullName);
+                JobCache.AddSchedulable(j);
                 _scheduler.Schedule(j);
             }
         }
@@ -60,21 +63,19 @@ public partial class Dispatcher
                     ?? throw new JobNotInjectedException(job.FullName);
                 dispatchables.Add(j);
             }
+
+
             _broker.OnMessageReceived += async (s, a) =>
             {
                 try
                 {
                     _logger.LogInformation($"Injected OnMessageReceived received a new message received {a}");
 
-                    var det = DispatcherMemMapper.GetJob(a.JobPath);
+                    var det = JobCache.GetDispatchable(a.JobPath);
                     if (det is null)
                     {
-                        det = new();
-                        det.AllJobs = dispatchables.Where(n => n.JobPath == a.JobPath).ToList();
-                        det.LoosJobs = dispatchables.Where(n => n.JobPath == a.JobPath && n.LoosArgument).ToList();
-                        det.TightJobs = dispatchables.Where(n => n.JobPath == a.JobPath && !n.LoosArgument).ToList();
-                        DispatcherMemMapper.Add(a.JobPath, det);
-
+                        _logger.LogWarning($"Injected OnMessageReceived  can not found any jobs for the path: {a.JobPath}");
+                        return;
                     }
 
                     var check = DispatchableJobArgument.TryParse(a.Message, out DispatchableJobArgument arg);
@@ -121,7 +122,17 @@ public partial class Dispatcher
                     _logger.LogCritical(ex, $"Injected OnMessageReceived (queduler kafka broker) encountered an error: {ex.Message}");
                 }
             };
+            foreach (var jobs in dispatchables.GroupBy(a => a.JobPath))
+            {
+                JobDets det = new();
+
+                det.AllJobs = jobs.ToList();
+                det.LoosJobs = jobs.Where(n => n.LoosArgument).ToList();
+                det.TightJobs = jobs.Where(n => !n.LoosArgument).ToList();
+                JobCache.AddDispatchable(jobs.Key, det);
+            }
             Task.Run(() => _broker.StartConsumingAsyn(cancellationToken)).ConfigureAwait(false);
+
         }
 
         async Task DispatchJob(OnMessageReceivedArgs a, DispatchableJobArgument arg, Type? job)
@@ -136,16 +147,26 @@ public partial class Dispatcher
         }
     }
 }
-public static class DispatcherMemMapper
+public static class JobCache
 {
-    static ConcurrentDictionary<string, JobDets> _mem = new();
-    public static void Add(string key, JobDets value)
+    static ConcurrentDictionary<string, JobDets> _dispactmem = new();
+    static ConcurrentDictionary<string, ISchedulableJob> _schedmem = new();
+    public static void AddDispatchable(string key, JobDets value)
     {
-        _mem.TryAdd(key, value);
+        _dispactmem.TryAdd(key, value);
     }
-    public static JobDets GetJob(string key)
+    public static JobDets GetDispatchable(string key)
     {
-        _mem.TryGetValue(key, out var v);
+        _dispactmem.TryGetValue(key, out var v);
+        return v;
+    }
+    public static void AddSchedulable(ISchedulableJob value)
+    {
+        _schedmem.TryAdd(value.JobId, value);
+    }
+    public static ISchedulableJob GetSchedulable(string key)
+    {
+        _schedmem.TryGetValue(key, out var v);
         return v;
     }
     public class JobDets

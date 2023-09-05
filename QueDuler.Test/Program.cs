@@ -75,19 +75,23 @@ await transformBlock.Completion;
 
 public class SampleIneMem : ISchedulableJob
 {
-    public SampleIneMem(Dispatcher dispatcher1)
+    public SampleIneMem(Dispatcher dispatcher1,JobResolver jobResolver)
     {
         Dispatcher1 = dispatcher1;
+        JobResolver = jobResolver;
     }
     public string JobId => "ana";
     //public string Cron => "*/5 * * * *";
     public string Cron => "*/15 * * * * *";
 
     public Dispatcher Dispatcher1 { get; }
+    public JobResolver JobResolver { get; }
 
     public async Task Do(params object[] arguments)
+
     {
         await Console.Out.WriteLineAsync("DODODO");
+        var t = JobResolver.GetDispatchable("jtopic_testa", "SyncRedisWithDbJob");
     }
 
     public TimeZoneInfo TimeZoneInfo() => System.TimeZoneInfo.Local;
@@ -97,7 +101,7 @@ public class SampleJOb : IDispatchableJob
 {
     public string JobId => "SyncRedisWithDbJob";
 
-    public string JobPath => "jtopic_test";
+    public string JobPath => "jtopic_testa";
 
     public bool LoosArgument => true;
 
