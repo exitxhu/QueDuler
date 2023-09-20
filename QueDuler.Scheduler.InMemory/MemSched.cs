@@ -28,7 +28,9 @@ public class MemSched
                 HashSet<PersistedJob>? js = Jobs.Where(a => !a.IsLocked && a.IsScheduleMeet).ToHashSet();
                 var tsk = js.Select(a => Task.Run(async () =>
                 {
-                    var pr = _provider.CreateScope().ServiceProvider.GetService(a.Job.GetType()) as ISchedulableJob;
+                    using var pro = _provider.CreateScope();
+
+                    var pr = pro.ServiceProvider.GetService(a.Job.GetType()) as ISchedulableJob;
                     if (pr != null)
                     {
                         a.IsLocked = true;

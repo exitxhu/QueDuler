@@ -91,7 +91,7 @@ public class SampleIneMem : ISchedulableJob
 
     {
         await Console.Out.WriteLineAsync("DODODO");
-        var t = JobResolver.GetDispatchable("jtopic_testa", "SyncRedisWithDbJob");
+        var t = JobResolver.GetDispatchable("jtopic_test", "SyncRedisWithDbJob");
     }
 
     public TimeZoneInfo TimeZoneInfo() => System.TimeZoneInfo.Local;
@@ -101,7 +101,7 @@ public class SampleJOb : IDispatchableJob
 {
     public string JobId => "SyncRedisWithDbJob";
 
-    public string JobPath => "jtopic_testa";
+    public string JobPath => "jtopic_test";
 
     public bool LoosArgument => true;
 
