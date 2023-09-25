@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ public class KafkaBroker : IBroker
                 tasks.Add(Task.Run(async () =>
                   {
                       string msg = string.Empty;
+                      var sw = new Stopwatch();
                       using var consumer = new ConsumerBuilder<Ignore, string>(Config).Build();
                       try
                       {
@@ -52,6 +54,7 @@ public class KafkaBroker : IBroker
                               try
                               {
                                   var consumeResult = consumer.Consume();
+                                  sw.Restart();
                                   msg = consumeResult.Message.Value;
                                   _logger.LogDebug("Kafka broker has received a new message: {0}, consumer number {1}", msg, consumerCount);
                                   var t = new Task(() => OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic.TopicName, consumeResult.Message)));
@@ -66,6 +69,10 @@ public class KafkaBroker : IBroker
                               {
                                   _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, consumerCount);
                                   break;
+                              }
+                              finally
+                              {
+                                  _logger.LogInformation($"topic {topic} no {i} finished in {sw.ElapsedMilliseconds} ms");
                               }
                           }
                           consumer.Close();
