@@ -21,6 +21,7 @@ namespace QueDuler.Helpers
 
             List<Type> dispatches = new();
             List<Type> schedules = new();
+            List<Type> observables= new();
             foreach (var assembly in config.JobAssemblies)
             {
                 dispatches.AddRange(assembly.DefinedTypes
@@ -29,16 +30,20 @@ namespace QueDuler.Helpers
                 schedules.AddRange(assembly.DefinedTypes
                    .Where(n => n.ImplementedInterfaces.Contains(typeof(ISchedulableJob)))
                    .Select(n => n.AsType()));
+                observables.AddRange(assembly.DefinedTypes
+                   .Where(n => n.ImplementedInterfaces.Contains(typeof(IObservableJob)))
+                   .Select(n => n.AsType()));
             }
 
-            foreach (var type in dispatches.Concat(schedules))
+            foreach (var type in dispatches.Concat(schedules).Concat(observables))
             {
                 services.AddTransient(type);
             }
             var args = new DispatcherArg
             {
                 DispatchableJobs = dispatches,
-                SchedulableJobs = schedules
+                SchedulableJobs = schedules,
+                ObservableJobs = observables,
             };
             services.AddSingleton(args);
             services.AddScoped<JobResolver>();
@@ -64,5 +69,6 @@ namespace QueDuler.Helpers
     {
         public IEnumerable<Type> DispatchableJobs { get; set; }
         public IEnumerable<Type> SchedulableJobs { get; set; }
+        public IEnumerable<Type> ObservableJobs { get; set; }
     }
 }

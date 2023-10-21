@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net7.0</TargetFramework>
@@ -6,13 +6,13 @@
 		<Nullable>enable</Nullable>
 		<PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.InMemory</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.InMemory</RepositoryUrl>
-		<Version>$(VersionPrefix)1.4.7</Version>
+		<Version>$(VersionPrefix)1.5.0</Version>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="NCrontab.Signed" Version="3.3.2" />
+		<PackageReference Include="NCrontab.Signed" Version="3.3.3" />
 	</ItemGroup>
 
 	<ItemGroup>

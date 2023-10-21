@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NCrontab;
+using QueDuler;
 using QueDuler.Helpers;
 using System.Threading.Channels;
 using System.Threading.Tasks.Dataflow;
@@ -18,7 +19,7 @@ services.AddQueduler(a => a.AddKafkaBroker(services, new Confluent.Kafka.Consume
     GroupId = "aa5",
     AutoOffsetReset = Confluent.Kafka.AutoOffsetReset.Earliest,
 
-}, topics: "jtopic_test")
+}, topics:new List<TopicMetadata> { new (){TopicName ="jtopic_test" ,ConsumerCount = 4} })
 .AddJobAssemblies(typeof(Program))
 .AddInMemoryScheduler(services, new()
 {
@@ -96,7 +97,29 @@ public class SampleIneMem : ISchedulableJob
 
     public TimeZoneInfo TimeZoneInfo() => System.TimeZoneInfo.Local;
 }
+public class SampleObsJOb : IObservableJob
+{
+    public string JobPath => "jtopic_test";
 
+    int a = 0;
+    Guid b = Guid.NewGuid();
+
+    public async Task OnNext(object? originalMessage = null)
+    {
+        a++;
+        throw new NotImplementedException();
+    }
+
+    public Task OnError(Exception ex)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task OnComplete()
+    {
+        throw new NotImplementedException();
+    }
+}
 public class SampleJOb : IDispatchableJob
 {
     public string JobId => "SyncRedisWithDbJob";

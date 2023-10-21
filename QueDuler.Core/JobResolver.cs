@@ -31,4 +31,12 @@ public sealed class JobResolver
 
         return service;
     }
+    public IObservableJob? GetObservable(string jobId)
+    {
+        var job = JobCache.GetSchedulable(jobId)?.GetType();
+        // var job = det?.AllJobs?.SingleOrDefault(a => a.JobId == jobId)?.GetType();
+        var service = job is null ? null : _provider.GetService(job) as IObservableJob;
+
+        return service;
+    }
 }

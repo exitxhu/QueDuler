@@ -5,5 +5,5 @@
     void PushMessage(OnMessageReceivedArgs message);
     Task StartConsumingAsyn(CancellationToken cancellationToken);
 }
-public record OnMessageReceivedArgs(string Message, string JobPath = null, object? originalMessage = null);
+public record OnMessageReceivedArgs(string Message, string ConsumerId, string JobPath = null, object? originalMessage = null);
 

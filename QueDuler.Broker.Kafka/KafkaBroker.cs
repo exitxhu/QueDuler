@@ -43,11 +43,12 @@ public class KafkaBroker : IBroker
                 tasks.Add(Task.Run(async () =>
                   {
                       string msg = string.Empty;
+                      string id = $"{topic.TopicName}_{consumerCount}";
                       var sw = new Stopwatch();
                       using var consumer = new ConsumerBuilder<Ignore, string>(Config).Build();
                       try
                       {
-                          _logger.LogWarning("Kafka consumer: will subscrib to: {0}, consumer number {1}", topic.TopicName, consumerCount);
+                          _logger.LogWarning("Kafka consumer: will subscrib to: {0}, consumer number {1}", topic.TopicName, id);
                           consumer.Subscribe(topic.TopicName);
                           while (!cancellationToken.IsCancellationRequested)
                           {
@@ -56,18 +57,18 @@ public class KafkaBroker : IBroker
                                   var consumeResult = consumer.Consume();
                                   sw.Restart();
                                   msg = consumeResult.Message.Value;
-                                  _logger.LogDebug("Kafka broker has received a new message: {0}, consumer number {1}", msg, consumerCount);
-                                  var t = new Task(() => OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic.TopicName, consumeResult.Message)));
+                                  _logger.LogDebug("Kafka broker has received a new message: {0}, consumer number {1}", msg, id);
+                                  var t = new Task(() => OnMessageReceived(this, new OnMessageReceivedArgs(msg, id, topic.TopicName, consumeResult.Message)));
                                   t.Start();
                                   await t.WaitAsync(cancellationToken);
                               }
                               catch (Exception ex) when (ex.Message.Contains("Application maximum poll", StringComparison.InvariantCultureIgnoreCase))
                               {
-                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, consumerCount);
+                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, id);
                               }
                               catch (Exception ex)
                               {
-                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, consumerCount);
+                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, id);
                                   break;
                               }
                               finally
