@@ -207,10 +207,12 @@ public partial class Dispatcher
         if (!t)
         {
             obs = JobCache.GetObservable(a.JobPath);
+            if (obs is null || obs.Count == 0)
+                return;
             ob.TryAdd(a.ConsumerId, obs);
-
         }
-        var tsks = obs.Select(j => Task.Run(async () =>
+
+        var tsks = obs?.Select(j => Task.Run(async () =>
         {
             try
             {
@@ -222,6 +224,8 @@ public partial class Dispatcher
                 await j.OnError(ex);
             }
         }));
+        if (tsks?.Any() != true)
+            return;
         Task.WaitAll(tsks.ToArray());
     }
 }
