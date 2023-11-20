@@ -52,9 +52,9 @@ public partial class Dispatcher
         {
             foreach (var job in _jobs.SchedulableJobs)
             {
-                //using var pro = _provider.CreateScope();
+                using var pro = _provider.CreateScope();
 
-                var j = _provider.GetService(job) as ISchedulableJob
+                var j = pro.ServiceProvider.GetService(job) as ISchedulableJob
                     ?? throw new JobNotInjectedException(job.FullName);
                 JobCache.AddSchedulable(j);
                 _scheduler.Schedule(j);
@@ -146,8 +146,8 @@ public partial class Dispatcher
 
         async Task DispatchJob(OnMessageReceivedArgs a, DispatchableJobArgument arg, Type? job)
         {
-           // using var pro = _provider.CreateScope();
-            var service = _provider.GetService(job) as IDispatchableJob;
+            using var pro = _provider.CreateScope();
+            var service = pro.ServiceProvider.GetService(job) as IDispatchableJob;
             if (service is not null)
             {
                 await service.Dispatch(arg, a.originalMessage);
@@ -161,9 +161,9 @@ public partial class Dispatcher
         {
             foreach (var job in _jobs.DispatchableJobs)
             {
-                //using var pro = _provider.CreateScope();
+                using var pro = _provider.CreateScope();
 
-                var j = _provider.GetService(job) as IDispatchableJob
+                var j = pro.ServiceProvider.GetService(job) as IDispatchableJob
                     ?? throw new JobNotInjectedException(job.FullName);
                 dispatchables.Add(j);
             }
@@ -174,9 +174,9 @@ public partial class Dispatcher
             var con = new ConcurrentDictionary<string, List<Type>>();
             foreach (var job in _jobs.ObservableJobs)
             {
-               // using var pro = _provider.CreateScope();
+                using var pro = _provider.CreateScope();
 
-                var j = _provider.GetService(job) as IObservableJob
+                var j = pro.ServiceProvider.GetService(job) as IObservableJob
                     ?? throw new JobNotInjectedException(job.FullName);
                 if (con.TryGetValue(j.JobPath, out var jobs))
                 {
@@ -191,9 +191,9 @@ public partial class Dispatcher
             {
                 var c = con.TryGetValue(a, out var jobs);
                 if (!c) return default;
-                //using var pro = _provider.CreateScope();
+                using var pro = _provider.CreateScope();
 
-                var o = jobs.Select(job => _provider.GetService(job) as IObservableJob
+                var o = jobs.Select(job => pro.ServiceProvider.GetService(job) as IObservableJob
                     ?? throw new JobNotInjectedException(job.FullName)).ToList();
                 return o;
             });

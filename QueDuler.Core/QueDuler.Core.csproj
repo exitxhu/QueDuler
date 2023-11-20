@@ -9,7 +9,7 @@
     <RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>C# Schedule Queue </PackageTags>
-    <Version>$(VersionPrefx)8.0.1</Version>
+    <Version>$(VersionPrefx)8.0.2</Version>
     <IncludeSymbols>True</IncludeSymbols>
 	  <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 	  <SymbolPackageFormat>snupkg</SymbolPackageFormat>
