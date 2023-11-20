@@ -1,16 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net7.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.InMemory</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.InMemory</RepositoryUrl>
-		<Version>$(VersionPrefix)1.5.0</Version>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<Version>$(VersionPrefix)8.0.1</Version>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
-
+	<Target Name="PushNuGetPackage" AfterTargets="GenerateNuspec">
+		<Message Text="----- Push NuGet Package to NuGet Feed" Importance="high"></Message>
+		<Exec Command="powershell .\nuget.ps1"></Exec>
+	</Target>
 	<ItemGroup>
 		<PackageReference Include="NCrontab.Signed" Version="3.3.3" />
 	</ItemGroup>

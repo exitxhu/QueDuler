@@ -34,7 +34,7 @@ public class InMemoryBroker : IBroker
                         try
                         {
                             var t = OnMessageReceived(this, new OnMessageReceivedArgs(msg, topic, ""));
-                            await t;
+                            await t.WaitAsync(cancellationToken);
                         }
                         catch (Exception ex)
                         {
