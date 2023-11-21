@@ -45,7 +45,7 @@ public class KafkaBroker : IBroker
                       string msg = string.Empty;
                       string id = $"{topic.TopicName}_{consumerCount}";
                       var sw = new Stopwatch();
-                      using var consumer = new ConsumerBuilder<Ignore, string>(Config).Build();
+                      var consumer = new ConsumerBuilder<Ignore, string>(Config).Build();
                       try
                       {
                           _logger.LogWarning("Kafka consumer: will subscrib to: {0}, consumer number {1}", topic.TopicName, id);
@@ -54,9 +54,10 @@ public class KafkaBroker : IBroker
                           {
                               try
                               {
-                                  var consumeResult = consumer.Consume();
+                                  var consumeResult = consumer.Consume(TimeSpan.FromMilliseconds(Config.MaxPollIntervalMs - (0.05 * Config.MaxPollIntervalMs) ?? 300000));
                                   sw.Restart();
-                                  msg = consumeResult.Message.Value;
+                                  msg = consumeResult?.Message?.Value;
+                                  if (msg is null) continue;
                                   _logger.LogDebug("Kafka broker has received a new message: {0}, consumer number {1}", msg, id);
                                   var t = OnMessageReceived(this, new OnMessageReceivedArgs(msg, id, topic.TopicName, consumeResult.Message));
                                   await t.WaitAsync(cancellationToken);
@@ -64,6 +65,7 @@ public class KafkaBroker : IBroker
                               catch (Exception ex) when (ex.Message.Contains("Application maximum poll", StringComparison.InvariantCultureIgnoreCase))
                               {
                                   _logger.LogCritical(ex, "Kafka broker has encountered some error, messgae is: {0}, consumer number {1}", msg, id);
+                                  consumer = new ConsumerBuilder<Ignore, string>(Config).Build();
                               }
                               catch (Exception ex)
                               {

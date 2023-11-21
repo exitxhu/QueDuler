@@ -19,7 +19,7 @@ services.AddQueduler(a => a.AddKafkaBroker(services, new Confluent.Kafka.Consume
     GroupId = "aa5",
     AutoOffsetReset = Confluent.Kafka.AutoOffsetReset.Earliest,
 
-}, topics:new List<TopicMetadata> { new (){TopicName ="jtopic_test" ,ConsumerCount = 4} })
+}, topics:new List<TopicMetadata> { new (){TopicName = "jtopic_CalculateOrderEvents\r\n", ConsumerCount = 4} })
 .AddJobAssemblies(typeof(Program))
 .AddInMemoryScheduler(services, new()
 {

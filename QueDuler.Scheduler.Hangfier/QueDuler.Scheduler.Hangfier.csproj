@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net7.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.Hangfier</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.Hangfier</RepositoryUrl>
-		<Version>$(VersionPrefix)8.0.2</Version>
+		<Version>$(VersionPrefix)7.0.4</Version>
 		<IncludeSymbols>True</IncludeSymbols>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
