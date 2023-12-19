@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.Hangfier</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.Hangfier</RepositoryUrl>
-		<Version>$(VersionPrefx)8.1.0</Version>
+		<Version>$(VersionPrefx)8.1.1</Version>
 		<IncludeSymbols>True</IncludeSymbols>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>

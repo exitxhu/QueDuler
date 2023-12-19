@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using QueDuler.Core.Internals;
 using QueDuler.Scheduler.InMemory;
 
 namespace QueDuler;

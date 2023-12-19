@@ -3,6 +3,7 @@ using Hangfire.Annotations;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using QueDuler;
+using QueDuler.Core.Internals;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
