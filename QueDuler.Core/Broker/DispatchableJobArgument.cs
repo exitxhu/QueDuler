@@ -1,10 +1,6 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Newtonsoft.Json;
 
-public abstract class BaseArgument
-{
-    public abstract string ToJson();
-}
 public class DispatchableJobArgument : BaseArgument
 {
     public DispatchableJobArgument(string jobId, object argumentObject = null, bool isBroadCast = false)

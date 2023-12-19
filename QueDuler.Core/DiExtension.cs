@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-
+using QueDuler.Core.Internals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,18 +60,4 @@ public static class DiExtension
         options.JobAssemblies = assemblies.ToList();
         return options;
     }
-}
-public class QuedulerOptions
-{
-    public List<Assembly> JobAssemblies { get; set; } = new List<Assembly>();
-}
-public class DispatcherArg
-{
-    public IEnumerable<Type> DispatchableJobs { get; set; }
-    public IEnumerable<Type> SchedulableJobs { get; set; }
-    public IEnumerable<Type> ObservableJobs { get; set; }
-}
-public class Broker<T>
-{
-
 }

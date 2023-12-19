@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using QueDuler.Helpers;
-
+using QueDuler.Core.Internals;
 
 namespace QueDuler.Helpers;
 

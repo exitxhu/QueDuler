@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QueDuler;
+using QueDuler.Core.Internals;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,23 +34,16 @@ public static class DiExtension
            new KafkaBroker(KafkaConfig, s.GetRequiredService<ILogger<KafkaBroker>>(), topics), BrokerLifetime));
         return configuration;
     }
-    public static QuedulerOptions AddTypedKafkaBroker<T>(this QuedulerOptions configuration,
-                                        T brokerConfig,
+    public static QuedulerOptions AddKafkaBroker(this QuedulerOptions configuration,
+                                        KafkaBrokerInstance brokerConfig,
                                         IServiceCollection services
-                                        ) where T : BrokerInstance<ConsumerConfig, TopicMetadata>
+                                        ) 
     {
-        services.Add(new ServiceDescriptor(typeof(Broker<T>), (s) =>
+        services.Add(new ServiceDescriptor(typeof(IBroker), (s) =>
            new KafkaBroker(brokerConfig.BrokerConfig,
                         s.GetRequiredService<ILogger<KafkaBroker>>(),
                         brokerConfig.PathConfigs.ToList()
                         ), brokerConfig.BrokerLifetime));
         return configuration;
     }
-}
-public abstract class KafkaBrokerInstance : BrokerInstance<ConsumerConfig, TopicMetadata>
-{
-    public override required ConsumerConfig BrokerConfig { get; set; }
-    public override required IEnumerable<TopicMetadata> PathConfigs { get; set; }
-    public override ServiceLifetime BrokerLifetime { get; set; } = ServiceLifetime.Transient;
-
 }

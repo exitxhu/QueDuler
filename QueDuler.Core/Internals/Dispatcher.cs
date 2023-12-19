@@ -2,7 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QueDuler.Core;
-using QueDuler.Helpers;
+using QueDuler.Core.Exceptions;
+using QueDuler.Core.Internals;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,35 +12,23 @@ using static JobCache;
 
 public partial class Dispatcher
 {
-    private readonly IBroker? _broker;
-    private readonly IScheduler? _scheduler;
+    private readonly IEnumerable<IBroker> _brokers;
+    private readonly IEnumerable<IScheduler> _schedulers;
     private readonly DispatcherArg _jobs;
     private readonly IServiceProvider _provider;
     private readonly ILogger<Dispatcher> _logger;
-    public Dispatcher(IBroker broker, IScheduler scheduler, DispatcherArg jobs, IServiceProvider provider, ILogger<Dispatcher> logger)
+    public bool HasBrokers => _brokers is not null && _brokers.Any();
+    public bool HasSchedulers => _schedulers is not null && _schedulers.Any();
+    public Dispatcher(DispatcherArg jobs, IServiceProvider provider, ILogger<Dispatcher> logger)
     {
-        _broker = broker;
-        _scheduler = scheduler;
         _jobs = jobs;
         _provider = provider;
         _logger = logger;
+        _brokers = GetBrokers();
+        _schedulers = GetSchedulers();
     }
-    public Dispatcher(IScheduler scheduler, DispatcherArg jobs, IServiceProvider provider, ILogger<Dispatcher> logger)
-    {
-        _broker = null;
-        _scheduler = scheduler;
-        _jobs = jobs;
-        _provider = provider;
-        _logger = logger;
-    }
-    public Dispatcher(IBroker broker, DispatcherArg jobs, IServiceProvider provider, ILogger<Dispatcher> logger)
-    {
-        _scheduler = null;
-        _broker = broker;
-        _jobs = jobs;
-        _provider = provider;
-        _logger = logger;
-    }
+    private IEnumerable<IBroker> GetBrokers() => _provider.GetServices<IBroker>().ToList();
+    private IEnumerable<IScheduler> GetSchedulers() => _provider.GetServices<IScheduler>().ToList();
     public void Start(CancellationToken cancellationToken)
     {
         HashSet<IDispatchableJob> dispatchables = new();
@@ -48,7 +37,7 @@ public partial class Dispatcher
         // but we should to resolve them again when we want to run them, other wise it wont be thread safe!
         // specially for dispatchable
 
-        if (_scheduler is not null)
+        if (HasSchedulers)
         {
             foreach (var job in _jobs.SchedulableJobs)
             {
@@ -57,89 +46,92 @@ public partial class Dispatcher
                 var j = pro.ServiceProvider.GetService(job) as ISchedulableJob
                     ?? throw new JobNotInjectedException(job.FullName);
                 JobCache.AddSchedulable(j);
-                _scheduler.Schedule(j);
+                _schedulers.First().Schedule(j);
             }
         }
-        if (_broker is not null)
+        if (HasBrokers)
         {
             ResolveAndCacheDispatchables(dispatchables);
             ResolveAndCacheObservablesFactory(_provider);
             var ob = new ConcurrentDictionary<string, List<IObservableJob>>();
-            _broker.OnMessageReceived += async (s, a) =>
+            foreach (IBroker _broker in _brokers)
             {
-                ProcessObservables(a, ob);
-                await ProccessForDispatchable(a);
-            };
-            async Task<bool> ProccessForDispatchable(OnMessageReceivedArgs a)
-            {
-                try
+
+                _broker.OnMessageReceived += async (s, a) =>
                 {
-                    _logger.LogInformation($"Injected OnMessageReceived received a new message received {a}");
-
-                    var det = JobCache.GetDispatchable(a.JobPath);
-                    if (det is null)
+                    ProcessObservables(a, ob);
+                    await ProccessForDispatchable(a);
+                };
+                async Task<bool> ProccessForDispatchable(OnMessageReceivedArgs a)
+                {
+                    try
                     {
-                        _logger.LogWarning($"Injected OnMessageReceived  can not found any jobs for the path: {a.JobPath}");
-                        return false;
-                    }
+                        _logger.LogInformation($"Injected OnMessageReceived received a new message received {a}");
 
-                    var check = DispatchableJobArgument.TryParse(a.Message, out DispatchableJobArgument arg);
-                    if (check)
-                    {
-                        if (det.TightJobs is null || !det.TightJobs.Any())
+                        var det = JobCache.GetDispatchable(a.JobPath);
+                        if (det is null)
                         {
-                            _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
+                            _logger.LogWarning($"Injected OnMessageReceived  can not found any jobs for the path: {a.JobPath}");
                             return false;
                         }
-                        if (arg.IsBroadCast)
+
+                        var check = DispatchableJobArgument.TryParse(a.Message, out DispatchableJobArgument arg);
+                        if (check)
                         {
-                            var jobTasks = det.AllJobs.Select(j => Task.Run(async () =>
+                            if (det.TightJobs is null || !det.TightJobs.Any())
                             {
-                                var job = j.GetType();
+                                _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
+                                return false;
+                            }
+                            if (arg.IsBroadCast)
+                            {
+                                var jobTasks = det.AllJobs.Select(j => Task.Run(async () =>
+                                {
+                                    var job = j.GetType();
+                                    await DispatchJob(a, arg, job);
+                                }));
+                                Task.WaitAll(jobTasks.ToArray());
+                            }
+                            else
+                            {
+                                var job = det.TightJobs.SingleOrDefault(a => a.JobId == arg.JobId)?.GetType();
                                 await DispatchJob(a, arg, job);
-                            }));
-                            Task.WaitAll(jobTasks.ToArray());
+                            }
+                        }
+                        if (det.LoosJobs is null || !det.LoosJobs.Any())
+                        {
+                            return false;
                         }
                         else
                         {
-                            var job = det.TightJobs.SingleOrDefault(a => a.JobId == arg.JobId)?.GetType();
-                            await DispatchJob(a, arg, job);
+
+                            var jobTasks = det.LoosJobs.Select(j => Task.Run(async () =>
+                            {
+                                var job = j.GetType();
+                                await DispatchJob(a, default, job);
+                            }));
+                            Task.WaitAll(jobTasks.ToArray());
                         }
                     }
-                    if (det.LoosJobs is null || !det.LoosJobs.Any())
+                    catch (Exception ex)
                     {
+                        //Todo: something about it
+                        _logger.LogCritical(ex, $"Injected OnMessageReceived (queduler kafka broker) encountered an error: {ex.Message}");
                         return false;
                     }
-                    else
-                    {
-
-                        var jobTasks = det.LoosJobs.Select(j => Task.Run(async () =>
-                        {
-                            var job = j.GetType();
-                            await DispatchJob(a, default, job);
-                        }));
-                        Task.WaitAll(jobTasks.ToArray());
-                    }
+                    return true;
                 }
-                catch (Exception ex)
+                foreach (var jobs in dispatchables.GroupBy(a => a.JobPath))
                 {
-                    //Todo: something about it
-                    _logger.LogCritical(ex, $"Injected OnMessageReceived (queduler kafka broker) encountered an error: {ex.Message}");
-                    return false;
+                    JobDets det = new();
+
+                    det.AllJobs = jobs.ToList();
+                    det.LoosJobs = jobs.Where(n => n.LoosArgument).ToList();
+                    det.TightJobs = jobs.Where(n => !n.LoosArgument).ToList();
+                    JobCache.AddDispatchable(jobs.Key, det);
                 }
-                return true;
+                Task.Run(() => _broker.StartConsumingAsyn(cancellationToken)).ConfigureAwait(false);
             }
-            foreach (var jobs in dispatchables.GroupBy(a => a.JobPath))
-            {
-                JobDets det = new();
-
-                det.AllJobs = jobs.ToList();
-                det.LoosJobs = jobs.Where(n => n.LoosArgument).ToList();
-                det.TightJobs = jobs.Where(n => !n.LoosArgument).ToList();
-                JobCache.AddDispatchable(jobs.Key, det);
-            }
-
-            Task.Run(() => _broker.StartConsumingAsyn(cancellationToken)).ConfigureAwait(false);
 
         }
 

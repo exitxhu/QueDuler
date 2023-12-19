@@ -14,7 +14,7 @@ Console.WriteLine("Hello, World!");
 var services = new ServiceCollection()
         .AddLogging();
 
-services.AddQueduler(a => a.AddTypedKafkaBroker(services, new AffilKaf
+services.AddQueduler(a => a.AddKafkaBroker( new AffilKaf
 {
     BrokerConfig = new Confluent.Kafka.ConsumerConfig
     {
@@ -22,9 +22,19 @@ services.AddQueduler(a => a.AddTypedKafkaBroker(services, new AffilKaf
         GroupId = "aa5",
         AutoOffsetReset = Confluent.Kafka.AutoOffsetReset.Earliest,
     },
-    PathConfigs = new List<TopicMetadata> { new() { TopicName = "jtopic_CalculateOrderEvents", ConsumerCount = 4 }
+    PathConfigs = new List<QueDuler.TopicMetadata> { new() { TopicName = "jtopic_CalculateOrderEvents", ConsumerCount = 1 }
 }
-})
+}, services).AddKafkaBroker(new AffilKaf
+{
+    BrokerConfig = new Confluent.Kafka.ConsumerConfig
+    {
+        BootstrapServers = "65.108.94.76:9092,65.21.241.239:9092,65.108.52.252:9092",
+        GroupId = "jober_dev",
+        AutoOffsetReset = Confluent.Kafka.AutoOffsetReset.Earliest,
+    },
+    PathConfigs = new List<QueDuler.TopicMetadata> { new() { TopicName = "yadol_RTB_Call_Report", ConsumerCount = 1 }
+}
+}, services)
 .AddJobAssemblies(typeof(Program))
 .AddInMemoryScheduler(services, new()
 {
