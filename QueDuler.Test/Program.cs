@@ -1,4 +1,5 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using Confluent.Kafka;
 using Hangfire.Common;
 using Microsoft.AspNetCore.Mvc.TagHelpers.Cache;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,20 +14,23 @@ Console.WriteLine("Hello, World!");
 var services = new ServiceCollection()
         .AddLogging();
 
-services.AddQueduler(a => a.AddKafkaBroker(services, new Confluent.Kafka.ConsumerConfig
+services.AddQueduler(a => a.AddTypedKafkaBroker(services, new AffilKaf
 {
-    BootstrapServers = "78.47.21.107:9092",
-    GroupId = "aa5",
-    AutoOffsetReset = Confluent.Kafka.AutoOffsetReset.Earliest,
-
-}, topics:new List<TopicMetadata> { new (){TopicName = "jtopic_CalculateOrderEvents", ConsumerCount = 4} })
+    BrokerConfig = new Confluent.Kafka.ConsumerConfig
+    {
+        BootstrapServers = "78.47.21.107:9092",
+        GroupId = "aa5",
+        AutoOffsetReset = Confluent.Kafka.AutoOffsetReset.Earliest,
+    },
+    PathConfigs = new List<TopicMetadata> { new() { TopicName = "jtopic_CalculateOrderEvents", ConsumerCount = 4 }
+}
+})
 .AddJobAssemblies(typeof(Program))
 .AddInMemoryScheduler(services, new()
 {
     MaxInMemoryLogCount = 10,
     TickTimeMillisecond = 1000,
 }));
-
 var serviceProvider = services.BuildServiceProvider();
 
 //configure console logging
@@ -76,7 +80,7 @@ await transformBlock.Completion;
 
 public class SampleIneMem : ISchedulableJob
 {
-    public SampleIneMem(Dispatcher dispatcher1,JobResolver jobResolver)
+    public SampleIneMem(Dispatcher dispatcher1, JobResolver jobResolver)
     {
         Dispatcher1 = dispatcher1;
         JobResolver = jobResolver;
@@ -132,4 +136,9 @@ public class SampleJOb : IDispatchableJob
     {
         await Task.Delay(2000);
     }
+}
+
+
+public class AffilKaf : KafkaBrokerInstance
+{
 }

@@ -92,7 +92,13 @@ public class KafkaBroker : IBroker
     }
     public void PushMessage(OnMessageReceivedArgs message) => OnMessageReceived?.Invoke(this, message);
 }
-public class TopicMetadata
+public class KafkaBroker<T, C, P> : KafkaBroker, IBroker<T> where T : BrokerInstance<C, P>
+{
+    public KafkaBroker(ConsumerConfig config, ILogger<KafkaBroker> logger, params string[] topics) : base(config, logger, topics)
+    {
+    }
+}
+public class TopicMetadata 
 {
     public string TopicName { get; set; }
     public int ConsumerCount { get; set; } = 1;
