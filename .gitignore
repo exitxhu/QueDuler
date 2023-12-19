@@ -361,7 +361,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/QueDuler.Broker.Kafka/nuget.ps1
-/QueDuler.Core/nuget.ps1
-/QueDuler.Scheduler.Hangfier/nuget.ps1
-/QueDuler.Scheduler.InMemory/nuget.ps1
+*.ps1
