@@ -76,21 +76,20 @@ public partial class Dispatcher
                         }
 
                         var check = DispatchableJobArgument.TryParse(a.Message, out DispatchableJobArgument arg);
+                        List<Task>? allJobTasks = new();
                         if (check)
                         {
-                            if (det.TightJobs is null || !det.TightJobs.Any())
+                            if (arg.IsBroadCast && det.AllJobs?.Any() == true)
+                            {
+                                allJobTasks = det.AllJobs.Select(j => Task.Run(async () =>
+                               {
+                                   var job = j.GetType();
+                                   await DispatchJob(a, arg, job);
+                               })).ToList();
+                            }
+                            else if (det.TightJobs is null || !det.TightJobs.Any())
                             {
                                 _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
-                                return false;
-                            }
-                            if (arg.IsBroadCast)
-                            {
-                                var jobTasks = det.AllJobs.Select(j => Task.Run(async () =>
-                                {
-                                    var job = j.GetType();
-                                    await DispatchJob(a, arg, job);
-                                }));
-                                Task.WaitAll(jobTasks.ToArray());
                             }
                             else
                             {
@@ -98,20 +97,16 @@ public partial class Dispatcher
                                 await DispatchJob(a, arg, job);
                             }
                         }
-                        if (det.LoosJobs is null || !det.LoosJobs.Any())
+                        if (det.LoosJobs?.Any() == true)
                         {
-                            return false;
-                        }
-                        else
-                        {
-
-                            var jobTasks = det.LoosJobs.Select(j => Task.Run(async () =>
+                            allJobTasks.AddRange(det.LoosJobs.Select(j => Task.Run(async () =>
                             {
                                 var job = j.GetType();
                                 await DispatchJob(a, default, job);
-                            }));
-                            Task.WaitAll(jobTasks.ToArray());
+                            })));
                         }
+                        if (allJobTasks?.Any() == true)
+                            Task.WaitAll(allJobTasks.ToArray());
                     }
                     catch (Exception ex)
                     {

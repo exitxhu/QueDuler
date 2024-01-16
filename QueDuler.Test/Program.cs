@@ -13,8 +13,9 @@ using System.Threading.Tasks.Dataflow;
 Console.WriteLine("Hello, World!");
 var services = new ServiceCollection()
         .AddLogging();
+services.AddQueduler(a => a.AddJobAssemblies(typeof(Program)));
 
-services.AddQueduler(a => a.AddKafkaBroker( new AffilKaf
+services.AddQueduler(a => a.AddKafkaBroker(new AffilKaf
 {
     BrokerConfig = new Confluent.Kafka.ConsumerConfig
     {
