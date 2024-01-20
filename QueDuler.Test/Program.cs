@@ -135,17 +135,32 @@ public class SampleObsJOb : IObservableJob
         throw new NotImplementedException();
     }
 }
-public class SampleJOb : IDispatchableJob
+public class SampleJOb : IDispatchableJob, IRetriable
 {
     public string JobId => "SyncRedisWithDbJob";
 
     public string JobPath => "jtopic_CalculateOrderEvents";
-
+    public SampleJOb()
+    {
+        RetryPolicyPrototype = new RetryManager(this).SetALAPCount(3); ;
+    }
     public bool LoosArgument => true;
+    private RetryManager _retryPolicyBuilder;
+    public RetryManager RetryPolicyPrototype
+    {
+        get => _retryPolicyBuilder;
+        set => _retryPolicyBuilder = value;
+    }
 
     public async Task Dispatch(DispatchableJobArgument argument, object? originalMessage = null)
     {
-        await Task.Delay(2000);
+        if (originalMessage is Message<Ignore, string> msg)
+        {
+
+        }
+        await Task.Delay(300);
+
+        throw new NotImplementedException();
     }
 }
 

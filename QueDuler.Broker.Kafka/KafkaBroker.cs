@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QueDuler.Core.Internals;
 using QueDuler.Helpers;
@@ -15,11 +16,18 @@ public class KafkaBroker : IBroker
 {
     private readonly ILogger<KafkaBroker> _logger;
     private readonly List<TopicMetadata> _topics;
+    private IProducer<Null, string> _producer;
 
     public ConsumerConfig Config { get; }
+    public string Key { get => Config.BootstrapServers; }
+
     public event Func<object, OnMessageReceivedArgs, Task> OnMessageReceived;
 
-    public KafkaBroker(ConsumerConfig config, ILogger<KafkaBroker> logger, params string[] topics)
+    public KafkaBroker(ConsumerConfig config,
+        ILogger<KafkaBroker> logger,
+        string[] topics,
+        IServiceProvider serviceProvider 
+        )
     {
         Config = config;
         _logger = logger;
@@ -27,14 +35,25 @@ public class KafkaBroker : IBroker
         {
             TopicName = a
         }).ToList();
+        InitiateProducer(serviceProvider);
     }
-    public KafkaBroker(ConsumerConfig config, ILogger<KafkaBroker> logger, List<TopicMetadata> topics)
+    public KafkaBroker(ConsumerConfig config,
+        ILogger<KafkaBroker> logger,
+        List<TopicMetadata> topics,
+        IServiceProvider serviceProvider 
+        )
     {
         Config = config;
         _logger = logger;
         _topics = topics;
+        InitiateProducer(serviceProvider);
     }
-    public async Task StartConsumingAsyn(CancellationToken cancellationToken)
+    private void InitiateProducer(IServiceProvider serviceProvider)
+    {
+        var conf = serviceProvider.GetKeyedService<ProducerConfig>(Key);
+        _producer = new ProducerBuilder<Null, string>(conf).Build();
+    }
+    public async Task StartConsumingAsync(CancellationToken cancellationToken)
     {
         List<Task> tasks = new List<Task>();
         var timeout = TimeSpan.FromMilliseconds(Config.MaxPollIntervalMs.HasValue ? Config.MaxPollIntervalMs.Value - (0.05 * Config.MaxPollIntervalMs.Value) : 300000);
@@ -92,5 +111,12 @@ public class KafkaBroker : IBroker
         }
         await Task.WhenAll(tasks);
     }
-    public void PushMessage(OnMessageReceivedArgs message) => OnMessageReceived?.Invoke(this, message);
+    public void MockPushMessage(OnMessageReceivedArgs message) => OnMessageReceived?.Invoke(this, message);
+    public async Task PushMessage(OnMessageReceivedArgs message)
+    {
+        await _producer.ProduceAsync(message.JobPath, new Message<Null, string>()
+        {
+            Value = message.Message,
+        });
+    }
 }

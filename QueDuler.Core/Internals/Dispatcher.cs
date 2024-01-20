@@ -77,6 +77,15 @@ public partial class Dispatcher
 
                         var check = DispatchableJobArgument.TryParse(a.Message, out DispatchableJobArgument arg);
                         List<Task>? allJobTasks = new();
+                        if (arg?.IsRetry == true)
+                        {
+                            var retryJob = det.AllJobs.FirstOrDefault(j => j.JobId == arg.JobId && a.JobPath == j.JobPath);
+                            if (retryJob == null || retryJob is not IRetriable r)
+                                return false;
+                            r.RetryPolicyPrototype = RetryManager.Parse(arg.RetryState, retryJob);
+                            await r.RetryPolicyPrototype.Retry(() => DispatchJobByServiceRefrence(a, arg, retryJob, _broker));
+                            return true;
+                        }
                         if (check)
                         {
                             if (arg.IsBroadCast && det.AllJobs?.Any() == true)
@@ -84,7 +93,7 @@ public partial class Dispatcher
                                 allJobTasks = det.AllJobs.Select(j => Task.Run(async () =>
                                {
                                    var job = j.GetType();
-                                   await DispatchJob(a, arg, job);
+                                   await DispatchJobByType(a, arg, job, _broker);
                                })).ToList();
                             }
                             else if (det.TightJobs is null || !det.TightJobs.Any())
@@ -94,7 +103,7 @@ public partial class Dispatcher
                             else
                             {
                                 var job = det.TightJobs.SingleOrDefault(a => a.JobId == arg.JobId)?.GetType();
-                                await DispatchJob(a, arg, job);
+                                await DispatchJobByType(a, arg, job, _broker);
                             }
                         }
                         if (det.LoosJobs?.Any() == true)
@@ -102,7 +111,7 @@ public partial class Dispatcher
                             allJobTasks.AddRange(det.LoosJobs.Select(j => Task.Run(async () =>
                             {
                                 var job = j.GetType();
-                                await DispatchJob(a, default, job);
+                                await DispatchJobByType(a, default, job, _broker);
                             })));
                         }
                         if (allJobTasks?.Any() == true)
@@ -125,23 +134,78 @@ public partial class Dispatcher
                     det.TightJobs = jobs.Where(n => !n.LoosArgument).ToList();
                     JobCache.AddDispatchable(jobs.Key, det);
                 }
-                Task.Run(() => _broker.StartConsumingAsyn(cancellationToken)).ConfigureAwait(false);
+                Task.Run(() => _broker.StartConsumingAsync(cancellationToken)).ConfigureAwait(false);
             }
 
         }
 
-        async Task DispatchJob(OnMessageReceivedArgs a, DispatchableJobArgument arg, Type? job)
+        async Task DispatchJobByType(OnMessageReceivedArgs a,
+            DispatchableJobArgument arg,
+            Type? job,
+            IBroker broker)
         {
             var service = _provider.CreateScope().ServiceProvider.GetService(job) as IDispatchableJob;
             if (service is not null)
             {
-                await service.Dispatch(arg, a.originalMessage);
+                try
+                {
+                    await service.Dispatch(arg, a.originalMessage);
+
+                }
+                catch (Exception ex) when (service is IRetriable r)
+                {
+                    await Retry(a, arg, service, broker, r);
+                    _logger.LogCritical(ex, "");
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
             }
             else
                 _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
 
         }
+        async Task DispatchJobByServiceRefrence(OnMessageReceivedArgs a,
+            DispatchableJobArgument arg,
+            IDispatchableJob service,
+            IBroker broker)
+        {
+            if (service is not null)
+            {
+                try
+                {
+                    await service.Dispatch(arg, a.originalMessage);
 
+                }
+                catch (Exception ex) when (service is IRetriable r)
+                {
+                    await Retry(a, arg, service, broker, r);
+                    _logger.LogCritical(ex, "");
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+            }
+            else
+                _logger.LogWarning($"Injected OnMessageReceived (queduler kafka broker) has a message: {a.Message} which is not corresponded with any job at path: {a.JobPath}");
+
+        }
+        async Task Retry(OnMessageReceivedArgs a, DispatchableJobArgument arg, IDispatchableJob service, IBroker broker, IRetriable r)
+        {
+            if (r.RetryPolicyPrototype.GetCurrentRetryActionType() == RetryType.ASAP)
+                await r.RetryPolicyPrototype.Retry(() => DispatchJobByServiceRefrence(a, arg, service, broker));
+            else if (r.RetryPolicyPrototype.GetCurrentRetryActionType() == RetryType.ALAP)
+                await broker.PushMessage(new OnMessageReceivedArgs(arg is null
+                        ? new DispatchableJobArgument(service.JobId, a.originalMessage).GetRetryObjectForJob(service.JobId, r.GetRetryState).ToJson()
+                        : arg.GetRetryObjectForJob(service.JobId, r.GetRetryState).ToJson(), a.ConsumerId, a.JobPath));
+
+            else if (r.RetryPolicyPrototype.GetCurrentRetryActionType() == RetryType.ASAP)
+            {
+                //TODO
+            }
+        }
         void ResolveAndCacheDispatchables(HashSet<IDispatchableJob> dispatchables)
         {
             foreach (var job in _jobs.DispatchableJobs)

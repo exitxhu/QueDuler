@@ -10,6 +10,9 @@ public class InMemoryBroker : IBroker
     private readonly string[] _topics;
 
     public BrokerConfig Config { get; }
+
+    public string Key => "SomeKey" + Config.GetHashCode();
+
     public event Func<object, OnMessageReceivedArgs, Task> OnMessageReceived;
 
     public InMemoryBroker(BrokerConfig config, ILogger<InMemoryBroker> logger, params string[] topics)
@@ -19,7 +22,7 @@ public class InMemoryBroker : IBroker
         _topics = topics;
     }
 
-    public async Task StartConsumingAsyn(CancellationToken cancellationToken)
+    public async Task StartConsumingAsync(CancellationToken cancellationToken)
     {
         List<Task> tasks = new List<Task>();
         foreach (var topic in _topics)
@@ -53,5 +56,9 @@ public class InMemoryBroker : IBroker
         }
         await Task.WhenAll(tasks);
     }
-    public void PushMessage(OnMessageReceivedArgs message) => OnMessageReceived?.Invoke(this, message);
+    public void MockPushMessage(OnMessageReceivedArgs message) => OnMessageReceived?.Invoke(this, message);
+    public Task PushMessage(OnMessageReceivedArgs message)
+    {
+        throw new NotImplementedException();
+    }
 }
