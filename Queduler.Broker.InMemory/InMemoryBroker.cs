@@ -61,4 +61,9 @@ public class InMemoryBroker : IBroker
     {
         throw new NotImplementedException();
     }
+
+    public (string key, Dictionary<string, byte[]> headers) DeconstructMessage(object originalMessage)
+    {
+        throw new NotImplementedException();
+    }
 }

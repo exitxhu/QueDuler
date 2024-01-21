@@ -25,13 +25,15 @@ public class DispatchableJobArgument : BaseArgument
     public string JobId { get; internal set; }
     [JsonInclude]
     public string RetryState { get; internal set; }
-    public bool IsBroadCast { get; }
-    public object ArgumentObject { get; }
+    [JsonInclude]
+    public bool IsBroadCast { get; init; }
+    [JsonInclude]
+    public object ArgumentObject { get; init; }
     public static bool TryParse(string json, out DispatchableJobArgument argument)
     {
         try
         {
-            argument = System.Text.Json.JsonSerializer.Deserialize<DispatchableJobArgument>(json);
+            argument = JsonSerializer.Deserialize<DispatchableJobArgument>(json);
             return !string.IsNullOrEmpty(argument.JobId);
         }
         catch (Exception)

@@ -7,7 +7,7 @@
 		<PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.InMemory</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Scheduler.InMemory</RepositoryUrl>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Version>$(VersionPrefx)8.2.1</Version>
+		<Version>$(VersionPrefx)8.2.3</Version>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
