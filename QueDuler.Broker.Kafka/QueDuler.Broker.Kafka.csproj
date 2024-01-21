@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Broker.Kafka</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Broker.Kafka</RepositoryUrl>
-		<Version>$(VersionPrefx)8.2.0</Version>
+		<Version>$(VersionPrefx)8.2.1</Version>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -14,6 +14,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Confluent.Kafka" Version="2.3.0" />
+		<PackageReference Include="linqPlusPlus" Version="1.4.5" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
 	</ItemGroup>
 	<Target Name="PushNuGetPackage" AfterTargets="GenerateNuspec">

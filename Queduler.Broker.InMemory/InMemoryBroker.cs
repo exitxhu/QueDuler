@@ -57,7 +57,7 @@ public class InMemoryBroker : IBroker
         await Task.WhenAll(tasks);
     }
     public void MockPushMessage(OnMessageReceivedArgs message) => OnMessageReceived?.Invoke(this, message);
-    public Task PushMessage(OnMessageReceivedArgs message)
+    public Task PushMessage(OnMessageReceivedArgs message, string key = null, Dictionary<string, byte[]> headers = null)
     {
         throw new NotImplementedException();
     }

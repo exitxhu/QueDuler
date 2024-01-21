@@ -197,9 +197,13 @@ public partial class Dispatcher
             if (r.RetryPolicyPrototype.GetCurrentRetryActionType() == RetryType.ASAP)
                 await r.RetryPolicyPrototype.Retry(() => DispatchJobByServiceRefrence(a, arg, service, broker));
             else if (r.RetryPolicyPrototype.GetCurrentRetryActionType() == RetryType.ALAP)
+            {
+                var t = broker.DeconstructMessage(a.originalMessage);
                 await broker.PushMessage(new OnMessageReceivedArgs(arg is null
                         ? new DispatchableJobArgument(service.JobId, a.originalMessage).GetRetryObjectForJob(service.JobId, r.GetRetryState).ToJson()
-                        : arg.GetRetryObjectForJob(service.JobId, r.GetRetryState).ToJson(), a.ConsumerId, a.JobPath));
+                        : arg.GetRetryObjectForJob(service.JobId, r.GetRetryState).ToJson(), a.ConsumerId, a.JobPath), t.key, t.headers
+                        );
+            }
 
             else if (r.RetryPolicyPrototype.GetCurrentRetryActionType() == RetryType.ASAP)
             {
