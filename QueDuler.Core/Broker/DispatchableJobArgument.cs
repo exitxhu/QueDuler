@@ -1,9 +1,12 @@
 ﻿// See https://aka.ms/new-console-template for more information
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
+using Newtonsoft.Json;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("QueDuler.Core.Test")]
 public class DispatchableJobArgument : BaseArgument
 {
+    [JsonConstructor]
     public DispatchableJobArgument(string jobId, object argumentObject = null, bool isBroadCast = false)
     {
         JobId = jobId;
@@ -19,30 +22,36 @@ public class DispatchableJobArgument : BaseArgument
         return t;
 
     }
-    [JsonInclude]
+    [JsonProperty]
     public bool IsRetry { get; internal set; } = false;
-    [JsonInclude]
+    [JsonProperty]
     public string JobId { get; internal set; }
-    [JsonInclude]
+    [JsonProperty]
     public string RetryState { get; internal set; }
-    [JsonInclude]
-    public bool IsBroadCast { get; init; }
-    [JsonInclude]
-    public object ArgumentObject { get; init; }
-    public static bool TryParse(string json, out DispatchableJobArgument argument)
+    [JsonProperty]
+    public bool IsBroadCast { get; }
+    [JsonProperty]
+    public object ArgumentObject { get; }
+    public static bool TryParse(string json, out DispatchableJobArgument argument, out Exception? ex)
     {
         try
         {
-            argument = JsonSerializer.Deserialize<DispatchableJobArgument>(json);
+            argument = JsonConvert.DeserializeObject<DispatchableJobArgument>(json);
+            ex = default;
             return !string.IsNullOrEmpty(argument.JobId);
         }
-        catch (Exception)
+        catch (Exception exc)
         {
+            ex = exc;
             argument = null;
             return false;
         }
-    }
 
-    public override string ToJson() => JsonSerializer.Serialize(this);
+    }
+    public DispatchableJobArgument()
+    {
+
+    }
+    public override string ToJson() => JsonConvert.SerializeObject(this);
 }
 

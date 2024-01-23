@@ -75,8 +75,10 @@ public partial class Dispatcher
                             return false;
                         }
 
-                        var check = DispatchableJobArgument.TryParse(a.Message, out DispatchableJobArgument arg);
+                        var check = DispatchableJobArgument.TryParse(a.Message, out DispatchableJobArgument arg, out var exc);
                         List<Task>? allJobTasks = new();
+                        if (exc is not null)
+                            _logger.LogWarning(exc, $"Can not desterilize object to proper form, input value is: {a.Message}");
                         if (arg?.IsRetry == true)
                         {
                             var retryJob = det.AllJobs.FirstOrDefault(j => j.JobId == arg.JobId && a.JobPath == j.JobPath);
