@@ -27,7 +27,7 @@ public partial class Dispatcher
         _brokers = GetBrokers();
         _schedulers = GetSchedulers();
     }
-    private IEnumerable<IBroker> GetBrokers() => _provider.GetServices<IBroker>().ToList();
+    private IEnumerable<IBroker> GetBrokers() => _jobs.BrokerKeys.Select(a => _provider.GetKeyedService<IBroker>(a))?.ToList()!;
     private IEnumerable<IScheduler> GetSchedulers() => _provider.GetServices<IScheduler>().ToList();
     public void Start(CancellationToken cancellationToken)
     {
@@ -250,6 +250,7 @@ public partial class Dispatcher
 
         }
     }
+    public IEnumerable<object> GetBrokerKeys()=> _jobs.BrokerKeys;
 
     private static void ProcessObservables(OnMessageReceivedArgs a, ConcurrentDictionary<string, List<IObservableJob>> ob)
     {

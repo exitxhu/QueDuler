@@ -18,9 +18,13 @@ public class KafkaBroker : IBroker
     private readonly List<TopicMetadata> _topics;
     private IProducer<Null, string> _producer;
     private IProducer<string, string> _keyedProducer;
-
+    private int consumerCount;
+    private Dictionary<string, int> startedConsumerCount = new();
+    private List<Task> startUpConsumers = new List<Task>();
+    private List<Task> runtimeConsumers = new List<Task>();
     public ConsumerConfig Config { get; }
     public string Key { get => Config.BootstrapServers; }
+    TimeSpan timeout = default;
 
     public event Func<object, OnMessageReceivedArgs, Task> OnMessageReceived;
 
@@ -37,6 +41,8 @@ public class KafkaBroker : IBroker
             TopicName = a
         }).ToList();
         InitiateProducer(serviceProvider);
+        consumerCount = topics.Length;
+        timeout = TimeSpan.FromMilliseconds(Config.MaxPollIntervalMs.HasValue ? Config.MaxPollIntervalMs.Value - (0.05 * Config.MaxPollIntervalMs.Value) : 300000);
     }
     public KafkaBroker(ConsumerConfig config,
         ILogger<KafkaBroker> logger,
@@ -48,6 +54,8 @@ public class KafkaBroker : IBroker
         _logger = logger;
         _topics = topics;
         InitiateProducer(serviceProvider);
+        consumerCount = topics.Count;
+
     }
     private void InitiateProducer(IServiceProvider serviceProvider)
     {
@@ -57,62 +65,78 @@ public class KafkaBroker : IBroker
     }
     public async Task StartConsumingAsync(CancellationToken cancellationToken)
     {
-        List<Task> tasks = new List<Task>();
-        var timeout = TimeSpan.FromMilliseconds(Config.MaxPollIntervalMs.HasValue ? Config.MaxPollIntervalMs.Value - (0.05 * Config.MaxPollIntervalMs.Value) : 300000);
         foreach (var topic in _topics)
         {
-            for (int i = 0; i < topic.ConsumerCount; i++)
+            for (startedConsumerCount[topic.TopicName] = startedConsumerCount.GetValueOrDefault(topic.TopicName); startedConsumerCount[topic.TopicName] < topic.ConsumerCount; startedConsumerCount[topic.TopicName]++)
             {
-                var consumerCount = i + 1;
-                tasks.Add(Task.Run(async () =>
-                  {
-                      string msg = string.Empty;
-                      string id = $"{topic.TopicName}_{consumerCount}";
-                      var sw = new Stopwatch();
-                      var consumer = new ConsumerBuilder<string, string>(Config).Build();
-                      try
-                      {
-                          _logger.LogWarning("Kafka consumer: will subscrib to: {0}, consumer number {1}", topic.TopicName, id);
-                          consumer.Subscribe(topic.TopicName);
-                          while (!cancellationToken.IsCancellationRequested)
-                          {
-                              try
-                              {
-                                  var consumeResult = consumer.Consume(timeout);
-                                  sw.Restart();
-                                  msg = consumeResult?.Message?.Value;
-                                  if (msg is null) continue;
-                                  _logger.LogDebug("Kafka broker has received a new message: {0}, consumer number {1}", msg, id);
-                                  var t = OnMessageReceived(this, new OnMessageReceivedArgs(msg, id, topic.TopicName, consumeResult.Message));
-                                  await t.WaitAsync(cancellationToken);
-                              }
-                              catch (Exception ex) when (ex.Message.Contains("Application maximum poll", StringComparison.InvariantCultureIgnoreCase))
-                              {
-                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, message is: {0}, consumer number {1}", msg, id);
-                                  consumer = new ConsumerBuilder<string, string>(Config).Build();
-                              }
-                              catch (Exception ex)
-                              {
-                                  _logger.LogCritical(ex, "Kafka broker has encountered some error, message is: {0}, consumer number {1}", msg, id);
-                                  break;
-                              }
-                              finally
-                              {
-                                  _logger.LogInformation($"topic {topic} no {i} finished in {sw.ElapsedMilliseconds} ms");
-                              }
-                          }
-                          consumer.Close();
-                      }
-                      catch (Exception ex)
-                      {
-                          _logger.LogCritical(ex, "Kafka broker on topic: {0}, consumer number {1} has some major error and can not start consuming!", topic, consumerCount);
-                          throw;
-                      }
-                  }));
+                startUpConsumers.Add(AddConsumer(timeout, topic.TopicName, cancellationToken));
             }
         }
-        await Task.WhenAll(tasks);
+        await Task.WhenAll(startUpConsumers);
     }
+    public async Task AddRuntimeConsumer(TimeSpan timeout , string topicName, CancellationToken cancellationToken)
+    {
+        startedConsumerCount[topicName] = startedConsumerCount.GetValueOrDefault(topicName) + 1;
+        runtimeConsumers.Add(AddConsumer(timeout, topicName, cancellationToken));
+        Task.WhenAll(runtimeConsumers);
+    }
+    public async Task AddRuntimeConsumer(string topicName, CancellationToken cancellationToken)
+    {
+        startedConsumerCount[topicName] = startedConsumerCount.GetValueOrDefault(topicName) + 1;
+        runtimeConsumers.Add(AddConsumer(timeout, topicName, cancellationToken));
+        Task.WhenAll(runtimeConsumers);
+    }
+
+    private Task AddConsumer(TimeSpan timeout, string topicName, CancellationToken cancellationToken)
+    {
+        return Task.Run(async () =>
+        {
+            int cNumber = startedConsumerCount[topicName];
+            string msg = string.Empty;
+            string id = $"{topicName}_{cNumber + 1}";
+            var sw = new Stopwatch();
+            var consumer = new ConsumerBuilder<string, string>(Config).Build();
+            try
+            {
+                _logger.LogWarning("Kafka consumer: will subscribe to: {0}, consumer number {1}", topicName, id);
+                consumer.Subscribe(topicName);
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    try
+                    {
+                        var consumeResult = consumer.Consume(timeout);
+                        sw.Restart();
+                        msg = consumeResult?.Message?.Value;
+                        if (msg is null) continue;
+                        _logger.LogDebug("Kafka broker has received a new message: {0}, consumer number {1}", msg, id);
+                        var t = OnMessageReceived(this, new OnMessageReceivedArgs(msg, id, topicName, consumeResult.Message));
+                        await t.WaitAsync(cancellationToken);
+                    }
+                    catch (Exception ex) when (ex.Message.Contains("Application maximum poll", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        _logger.LogCritical(ex, "Kafka broker has encountered some error, message is: {0}, consumer number {1}", msg, id);
+                        consumer = new ConsumerBuilder<string, string>(Config).Build();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogCritical(ex, "Kafka broker has encountered some error, message is: {0}, consumer number {1}", msg, id);
+                        break;
+                    }
+                    finally
+                    {
+                        _logger.LogInformation($"topic {topicName} no {cNumber} finished in {sw.ElapsedMilliseconds} ms");
+                    }
+                }
+                consumer.Close();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogCritical(ex, "Kafka broker on topic: {0}, consumer number {1} has some major error and can not start consuming!", topicName, cNumber + 1);
+                throw;
+            }
+        });
+    }
+
     public void MockPushMessage(OnMessageReceivedArgs message) => OnMessageReceived?.Invoke(this, message);
     public async Task PushMessage(OnMessageReceivedArgs message, string key = null, Dictionary<string, byte[]> headers = null)
     {
@@ -140,4 +164,5 @@ public class KafkaBroker : IBroker
             return (m.Key, m.Headers.Select(a => new KeyValuePair<string, byte[]>(a.Key, a.GetValueBytes())).ToDictionary());
         return default;
     }
+
 }

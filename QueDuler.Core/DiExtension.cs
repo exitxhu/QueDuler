@@ -21,7 +21,7 @@ public static class DiExtension
 
         List<Type> dispatches = new();
         List<Type> schedules = new();
-        List<Type> observables= new();
+        List<Type> observables = new();
         foreach (var assembly in config.JobAssemblies)
         {
             dispatches.AddRange(assembly.DefinedTypes
@@ -44,6 +44,7 @@ public static class DiExtension
             DispatchableJobs = dispatches,
             SchedulableJobs = schedules,
             ObservableJobs = observables,
+            BrokerKeys = config.BrokerKeys,
         };
         services.AddSingleton(args);
         services.AddScoped<JobResolver>();

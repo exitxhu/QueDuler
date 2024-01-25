@@ -4,7 +4,7 @@ using QueDuler.Scheduler.InMemory;
 
 namespace QueDuler;
 
-public class InMemoryBroker : IBroker
+public class InMemoryBroker //: IBroker
 {
     private readonly ILogger<InMemoryBroker> _logger;
     private readonly string[] _topics;
@@ -63,6 +63,11 @@ public class InMemoryBroker : IBroker
     }
 
     public (string key, Dictionary<string, byte[]> headers) DeconstructMessage(object originalMessage)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task AddRuntimeConsumer(TimeSpan timeout, string topicName, CancellationToken cancellationToken)
     {
         throw new NotImplementedException();
     }

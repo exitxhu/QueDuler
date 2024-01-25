@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<PackageProjectUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Broker.Kafka</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/exitxhu/QueDuler/tree/master/QueDuler.Broker.Kafka</RepositoryUrl>
-		<Version>$(VersionPrefx)8.2.3</Version>
+		<Version>$(VersionPrefx)8.2.6</Version>
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>

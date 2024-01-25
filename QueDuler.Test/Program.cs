@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NCrontab;
 using QueDuler;
+using QueDuler.Core.Internals;
 using QueDuler.Helpers;
 using System.Threading.Channels;
 using System.Threading.Tasks.Dataflow;
@@ -47,13 +48,14 @@ var serviceProvider = services.BuildServiceProvider();
 //configure console logging
 serviceProvider.GetService<ILoggerFactory>();
 
-
-
+var brokrts = serviceProvider.GetKeyedService<IBroker>("78.47.21.107:9092");
+var timeout = TimeSpan.FromMilliseconds(300000);
 
 
 var dispatcher = serviceProvider.GetService<Dispatcher>();
 dispatcher.Start(new CancellationToken { });
 int o = 0;
+brokrts.AddRuntimeConsumer(timeout, "jtopic_CalculateOrderEvents", CancellationToken.None);
 
 
 var transformBlock = new TransformBlock<int?, string>(async request =>
