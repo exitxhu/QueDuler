@@ -120,7 +120,7 @@ public class KafkaBroker : IBroker
                     catch (Exception ex)
                     {
                         _logger.LogCritical(ex, "Kafka broker has encountered some error, message is: {0}, consumer number {1}", msg, id);
-                        break;
+                        consumer = new ConsumerBuilder<string, string>(Config).Build();
                     }
                     finally
                     {
