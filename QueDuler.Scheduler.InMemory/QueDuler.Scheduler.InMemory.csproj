@@ -11,10 +11,10 @@
 		<IncludeSymbols>True</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
-	<Target Name="PushNuGetPackage" AfterTargets="GenerateNuspec">
-		<Message Text="----- Push NuGet Package to NuGet Feed" Importance="high"></Message>
+	<!--<Target Name="PushNuGetPackage" AfterTargets="GenerateNuspec">
+		<Message Text="- - - - - Push NuGet Package to NuGet Feed" Importance="high"></Message>
 		<Exec Command="powershell .\nuget.ps1"></Exec>
-	</Target>
+	</Target>-->
 	<ItemGroup>
 		<PackageReference Include="NCrontab.Signed" Version="3.3.3" />
 	</ItemGroup>

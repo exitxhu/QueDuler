@@ -17,10 +17,10 @@
 		<PackageReference Include="linqPlusPlus" Version="1.4.5" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
 	</ItemGroup>
-	<Target Name="PushNuGetPackage" AfterTargets="GenerateNuspec">
-		<Message Text="----- Push NuGet Package to NuGet Feed" Importance="high"></Message>
+	<!--<Target Name="PushNuGetPackage" AfterTargets="GenerateNuspec">
+		<Message Text="- - - - - Push NuGet Package to NuGet Feed" Importance="high"></Message>
 		<Exec Command="powershell .\nuget.ps1"></Exec>
-	</Target>
+	</Target>-->
 	<ItemGroup>
 		<ProjectReference Include="..\QueDuler.Core\QueDuler.Core.csproj" />
 	</ItemGroup>
